@@ -1,3 +1,7 @@
+## 1.0.4
+
+Rebased .git to have all the history of the project
+
 ## 1.0.3
 
 Upgraded js to 0.7.1 on zikzak_inappwebview_web
