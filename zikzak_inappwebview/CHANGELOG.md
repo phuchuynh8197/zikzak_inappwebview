@@ -1,3 +1,7 @@
+## 1.0.5
+
+Updated example to work with latest flutter version
+
 ## 1.0.4
 
 Rebased .git to have all the history of the project
