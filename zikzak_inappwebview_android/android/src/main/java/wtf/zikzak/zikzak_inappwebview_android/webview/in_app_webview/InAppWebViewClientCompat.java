@@ -56,6 +56,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class InAppWebViewClientCompat extends WebViewClientCompat {
 
@@ -74,6 +75,12 @@ public class InAppWebViewClientCompat extends WebViewClientCompat {
   public boolean shouldOverrideUrlLoading(@NonNull WebView view, @NonNull WebResourceRequest request) {
     InAppWebView webView = (InAppWebView) view;
     if (webView.customSettings.useShouldOverrideUrlLoading) {
+      if (webView.customSettings.regexToCancelOverrideUrlLoading != null) {
+        Pattern pattern = Pattern.compile(webView.customSettings.regexToCancelOverrideUrlLoading);
+        Matcher m = pattern.matcher(request.getUrl().toString());
+        Log.i(LOG_TAG, request.getUrl().toString() + " isMatch " + m.matches());
+        if (m.matches() == false) return false;
+      }
       boolean isRedirect = false;
       if (WebViewFeature.isFeatureSupported(WebViewFeature.WEB_RESOURCE_REQUEST_IS_REDIRECT)) {
         isRedirect = WebResourceRequestCompat.isRedirect(request);
@@ -108,6 +115,12 @@ public class InAppWebViewClientCompat extends WebViewClientCompat {
   public boolean shouldOverrideUrlLoading(WebView webView, String url) {
     InAppWebView inAppWebView = (InAppWebView) webView;
     if (inAppWebView.customSettings.useShouldOverrideUrlLoading) {
+      if (inAppWebView.customSettings.regexToCancelOverrideUrlLoading != null) {
+        Pattern pattern = Pattern.compile(inAppWebView.customSettings.regexToCancelOverrideUrlLoading);
+        Matcher m = pattern.matcher(url);
+        Log.i(LOG_TAG, url + " isMatch " + m.matches());
+        if (m.matches() == false) return false;
+      }
       onShouldOverrideUrlLoading(inAppWebView, url, "GET", null,true, false, false);
       return true;
     }
