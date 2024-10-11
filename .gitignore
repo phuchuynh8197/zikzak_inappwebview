@@ -16,6 +16,11 @@
 .idea/
 
 # The .vscode folder contains launch configuration and tasks you configure in
+
+!example/windows/flutter/ephemeral/.plugin_symlinks/url_launcher_windows
+!example/windows/flutter/ephemeral/.plugin_symlinks/zikzak_inappwebview_windows
+
+
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 #.vscode/

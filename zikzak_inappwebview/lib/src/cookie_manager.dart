@@ -32,7 +32,7 @@ class CookieManager {
 
   static CookieManager? _instance;
 
-  WebViewEnvironment? _webViewEnvironment;
+  // WebViewEnvironment? _webViewEnvironment;
 
   ///Gets the [CookieManager] shared instance.
   ///
