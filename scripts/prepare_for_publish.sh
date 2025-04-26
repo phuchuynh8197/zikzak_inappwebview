@@ -80,31 +80,6 @@ done
 # Update dependencies in each package to use versioned dependencies instead of path
 echo -e "${BLUE}Updating dependencies to use versioned references${NC}"
 
-# First update internal_annotations dependency in platform_interface
-if [ -f "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml" ]; then
-    echo -e "${YELLOW}Updating internal_annotations dependency in platform_interface${NC}"
-    awk -v version="$VERSION" '
-    {
-        if ($0 ~ /zikzak_inappwebview_internal_annotations:/) {
-            if ($0 ~ /^  zikzak_inappwebview_internal_annotations:$/) {
-                print "  zikzak_inappwebview_internal_annotations: ^" version;
-                getline; # skip the path line if it exists
-                if ($0 !~ /path:/) {
-                    print $0; # if not a path line, print it
-                }
-            } else {
-                print "  zikzak_inappwebview_internal_annotations: ^" version;
-            }
-        } else if ($0 ~ /path: ..\/zikzak_inappwebview_internal_annotations/) {
-            # Skip path lines
-        } else {
-            print $0;
-        }
-    }' "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml" > "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml.new"
-
-    mv "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml.new" "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml"
-fi
-
 # Update platform_interface dependency in all platform packages
 for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
     if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then

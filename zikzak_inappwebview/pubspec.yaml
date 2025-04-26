@@ -31,8 +31,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.1
   build_runner: ^2.4.0
-  # generators:
-  #   path: ../dev_packages/generators
+  generators:
+    path: ../dev_packages/generators
   zikzak_inappwebview_internal_annotations: ^2.0.0
 
 # For information on the generic Dart part of this file, see the

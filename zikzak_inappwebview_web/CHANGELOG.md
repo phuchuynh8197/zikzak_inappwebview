@@ -1,5 +1,15 @@
 ## 2.0.0 - 2025-04-26
 
+* fix dependencies, upgraded to Android compileSdk 35
+* Updated dependencies to use hosted references
+
+## 2.0.0 - 2025-04-26
+
+* fixed dependencies
+* Updated dependencies to use hosted references
+
+## 2.0.0 - 2025-04-26
+
 * Fixed package dependecy issues
 * Updated dependencies to use hosted references
 
