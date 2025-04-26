@@ -1,7 +1,7 @@
 targets:
   $default:
     builders:
-      generators|zikzak_inappwebview_internal_annotations:
+      generators:
         enabled: true
 
 builders:
@@ -10,7 +10,8 @@ builders:
     # 1
     import: "package:generators/builder.dart"
     # 2
-    builder_factories: ["generateExchangeableObject", "generateExchangeableEnum"]
+    builder_factories:
+      ["generateExchangeableObject", "generateExchangeableEnum"]
     # 3
     build_extensions: { ".dart": [".g.part"] }
     auto_apply: dependents

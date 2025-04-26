@@ -16,7 +16,7 @@ class PlatformWebViewFeatureCreationParams {
   const PlatformWebViewFeatureCreationParams();
 }
 
-///{@template zikzak_inappwebview_platform_interface.PlatformWebViewFeature}
+///{@template flutter_inappwebview_platform_interface.PlatformWebViewFeature}
 ///Class that represents an Android-specific utility class for checking which WebView Support Library features are supported on the device.
 ///
 ///**Officially Supported Platforms/Implementations**:
@@ -27,7 +27,7 @@ abstract class PlatformWebViewFeature extends PlatformInterface {
   factory PlatformWebViewFeature(PlatformWebViewFeatureCreationParams params) {
     assert(
       InAppWebViewPlatform.instance != null,
-      'A platform implementation for `zikzak_inappwebview` has not been set. Please '
+      'A platform implementation for `flutter_inappwebview` has not been set. Please '
       'ensure that an implementation of `InAppWebViewPlatform` has been set to '
       '`WebViewPlatform.instance` before use. For unit testing, '
       '`WebViewPlatform.instance` can be set with your own test implementation.',
@@ -42,7 +42,7 @@ abstract class PlatformWebViewFeature extends PlatformInterface {
   factory PlatformWebViewFeature.static() {
     assert(
       InAppWebViewPlatform.instance != null,
-      'A platform implementation for `zikzak_inappwebview` has not been set. Please '
+      'A platform implementation for `flutter_inappwebview` has not been set. Please '
       'ensure that an implementation of `InAppWebViewPlatform` has been set to '
       '`WebViewPlatform.instance` before use. For unit testing, '
       '`WebViewPlatform.instance` can be set with your own test implementation.',
@@ -66,7 +66,7 @@ abstract class PlatformWebViewFeature extends PlatformInterface {
   /// The parameters used to initialize the [PlatformWebViewFeature].
   final PlatformWebViewFeatureCreationParams params;
 
-  ///{@template zikzak_inappwebview_platform_interface.PlatformWebViewFeature.isFeatureSupported}
+  ///{@template flutter_inappwebview_platform_interface.PlatformWebViewFeature.isFeatureSupported}
   ///Return whether a feature is supported at run-time. On devices running Android version `Build.VERSION_CODES.LOLLIPOP` and higher,
   ///this will check whether a feature is supported, depending on the combination of the desired feature, the Android version of device,
   ///and the WebView APK on the device. If running on a device with a lower API level, this will always return `false`.
@@ -86,7 +86,7 @@ abstract class PlatformWebViewFeature extends PlatformInterface {
         'isFeatureSupported is not implemented on the current platform');
   }
 
-  ///{@template zikzak_inappwebview_platform_interface.PlatformWebViewFeature.isStartupFeatureSupported}
+  ///{@template flutter_inappwebview_platform_interface.PlatformWebViewFeature.isStartupFeatureSupported}
   ///Return whether a startup feature is supported at run-time.
   ///On devices running Android version `Build.VERSION_CODES.LOLLIPOP` and higher,
   ///this will check whether a startup feature is supported,
@@ -109,7 +109,7 @@ abstract class PlatformWebViewFeature extends PlatformInterface {
   }
 }
 
-///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature}
+///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeature}
 @ExchangeableEnum()
 class WebViewFeature_ {
   // ignore: unused_field
@@ -293,10 +293,6 @@ class WebViewFeature_ {
   static const DOCUMENT_START_SCRIPT =
       const WebViewFeature_._internal("DOCUMENT_START_SCRIPT");
 
-  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.willSuppressErrorPage].
-  static const SUPPRESS_ERROR_PAGE =
-      const WebViewFeature_._internal("SUPPRESS_ERROR_PAGE");
-
   ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.algorithmicDarkeningAllowed].
   static const ALGORITHMIC_DARKENING =
       const WebViewFeature_._internal("ALGORITHMIC_DARKENING");
@@ -333,11 +329,11 @@ class WebViewFeature_ {
       const WebViewFeature_._internal(
           "STARTUP_FEATURE_SET_DIRECTORY_BASE_PATHS");
 
-  ///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature.isFeatureSupported}
+  ///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeature.isFeatureSupported}
   static Future<bool> isFeatureSupported(WebViewFeature feature) =>
       PlatformWebViewFeature.static().isFeatureSupported(feature);
 
-  ///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature.isStartupFeatureSupported}
+  ///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeature.isStartupFeatureSupported}
   static Future<bool> isStartupFeatureSupported(
           WebViewFeature startupFeature) =>
       PlatformWebViewFeature.static().isStartupFeatureSupported(startupFeature);

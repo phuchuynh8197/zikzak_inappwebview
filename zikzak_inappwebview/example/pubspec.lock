@@ -355,14 +355,6 @@ packages:
       relative: true
     source: path
     version: "1.7.0"
-  zikzak_inappwebview_internal_annotations:
-    dependency: transitive
-    description:
-      name: zikzak_inappwebview_internal_annotations
-      sha256: "4a2057a5299edb94d1da0414f5bfbe3ccb54c5028cced89938c1b01355eeabc6"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.7.0"
   zikzak_inappwebview_ios:
     dependency: "direct overridden"
     description:

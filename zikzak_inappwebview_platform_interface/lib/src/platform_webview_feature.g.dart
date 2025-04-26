@@ -6,7 +6,7 @@ part of 'platform_webview_feature.dart';
 // ExchangeableEnumGenerator
 // **************************************************************************
 
-///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature}
+///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeature}
 class WebViewFeature {
   final String _value;
   final String _nativeValue;
@@ -175,10 +175,6 @@ class WebViewFeature {
   static const START_SAFE_BROWSING =
       WebViewFeature._internal('START_SAFE_BROWSING', 'START_SAFE_BROWSING');
 
-  ///Feature for [isFeatureSupported]. This feature covers [InAppWebViewSettings.willSuppressErrorPage].
-  static const SUPPRESS_ERROR_PAGE =
-      WebViewFeature._internal('SUPPRESS_ERROR_PAGE', 'SUPPRESS_ERROR_PAGE');
-
   ///
   static const TRACING_CONTROLLER_BASIC_USAGE = WebViewFeature._internal(
       'TRACING_CONTROLLER_BASIC_USAGE', 'TRACING_CONTROLLER_BASIC_USAGE');
@@ -275,7 +271,6 @@ class WebViewFeature {
     WebViewFeature.STARTUP_FEATURE_SET_DATA_DIRECTORY_SUFFIX,
     WebViewFeature.STARTUP_FEATURE_SET_DIRECTORY_BASE_PATHS,
     WebViewFeature.START_SAFE_BROWSING,
-    WebViewFeature.SUPPRESS_ERROR_PAGE,
     WebViewFeature.TRACING_CONTROLLER_BASIC_USAGE,
     WebViewFeature.VISUAL_STATE_CALLBACK,
     WebViewFeature.WEB_MESSAGE_ARRAY_BUFFER,
@@ -317,11 +312,11 @@ class WebViewFeature {
     return null;
   }
 
-  ///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature.isFeatureSupported}
+  ///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeature.isFeatureSupported}
   static Future<bool> isFeatureSupported(WebViewFeature feature) =>
       PlatformWebViewFeature.static().isFeatureSupported(feature);
 
-  ///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature.isStartupFeatureSupported}
+  ///{@macro flutter_inappwebview_platform_interface.PlatformWebViewFeature.isStartupFeatureSupported}
   static Future<bool> isStartupFeatureSupported(
           WebViewFeature startupFeature) =>
       PlatformWebViewFeature.static().isStartupFeatureSupported(startupFeature);

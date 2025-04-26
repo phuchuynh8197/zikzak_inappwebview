@@ -1,7 +1,72 @@
 import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:zikzak_inappwebview_platform_interface/zikzak_inappwebview_platform_interface.dart';
+
+///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature}
+class AndroidWebViewFeature extends PlatformWebViewFeature
+    with ChannelController {
+  static AndroidWebViewFeature? _instance;
+
+  /// Creates a new [AndroidWebViewFeature].
+  AndroidWebViewFeature(PlatformWebViewFeatureCreationParams params)
+      : super.implementation(
+          params is AndroidWebViewFeatureCreationParams
+              ? params
+              : AndroidWebViewFeatureCreationParams
+                  .fromPlatformWebViewFeatureCreationParams(params),
+        ) {
+    channel =
+        const MethodChannel('wtf.zikzak/zikzak_inappwebview_webviewfeature');
+    handler = handleMethod;
+    initMethodCallHandler();
+  }
+
+  factory AndroidWebViewFeature.static() {
+    return instance();
+  }
+
+  @override
+  void dispose() {
+    // empty
+  }
+
+  @override
+  Future<bool> isFeatureSupported(WebViewFeature feature) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("feature", () => feature.toNativeValue());
+    return await channel?.invokeMethod<bool>('isFeatureSupported', args) ??
+        false;
+  }
+
+  Future<bool> isStartupFeatureSupported(WebViewFeature startupFeature) async {
+    Map<String, dynamic> args = <String, dynamic>{};
+    args.putIfAbsent("startupFeature", () => startupFeature.toNativeValue());
+    return await channel?.invokeMethod<bool>(
+            'isStartupFeatureSupported', args) ??
+        false;
+  }
+
+  Future<dynamic> _handleMethod(MethodCall call) async {}
+
+  ///Gets the [AndroidWebViewFeature] shared instance.
+  static AndroidWebViewFeature instance() {
+    return (_instance != null) ? _instance! : _init();
+  }
+
+  static AndroidWebViewFeature _init() {
+    _instance = AndroidWebViewFeature(AndroidWebViewFeatureCreationParams(
+        const PlatformWebViewFeatureCreationParams()));
+    return _instance!;
+  }
+
+  @override
+  UnimplementedError(p1) {
+    // TODO: implement UnimplementedError
+    throw UnimplementedError(p1);
+  }
+}
 
 /// Object specifying creation parameters for creating a [AndroidWebViewFeature].
 ///
@@ -22,65 +87,6 @@ class AndroidWebViewFeatureCreationParams
   factory AndroidWebViewFeatureCreationParams.fromPlatformWebViewFeatureCreationParams(
       PlatformWebViewFeatureCreationParams params) {
     return AndroidWebViewFeatureCreationParams(params);
-  }
-}
-
-///{@macro zikzak_inappwebview_platform_interface.PlatformWebViewFeature}
-class AndroidWebViewFeature extends PlatformWebViewFeature
-    with ChannelController {
-  /// Creates a new [AndroidWebViewFeature].
-  AndroidWebViewFeature(PlatformWebViewFeatureCreationParams params)
-      : super.implementation(
-          params is AndroidWebViewFeatureCreationParams
-              ? params
-              : AndroidWebViewFeatureCreationParams
-                  .fromPlatformWebViewFeatureCreationParams(params),
-        ) {
-    channel =
-        const MethodChannel('wtf.zikzak/zikzak_inappwebview_webviewfeature');
-    handler = handleMethod;
-    initMethodCallHandler();
-  }
-
-  factory AndroidWebViewFeature.static() {
-    return instance();
-  }
-
-  static AndroidWebViewFeature? _instance;
-
-  ///Gets the [AndroidWebViewFeature] shared instance.
-  static AndroidWebViewFeature instance() {
-    return (_instance != null) ? _instance! : _init();
-  }
-
-  static AndroidWebViewFeature _init() {
-    _instance = AndroidWebViewFeature(AndroidWebViewFeatureCreationParams(
-        const PlatformWebViewFeatureCreationParams()));
-    return _instance!;
-  }
-
-  Future<dynamic> _handleMethod(MethodCall call) async {}
-
-  @override
-  Future<bool> isFeatureSupported(WebViewFeature feature) async {
-    Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent("feature", () => feature.toNativeValue());
-    return await channel?.invokeMethod<bool>('isFeatureSupported', args) ??
-        false;
-  }
-
-  @override
-  Future<bool> isStartupFeatureSupported(WebViewFeature startupFeature) async {
-    Map<String, dynamic> args = <String, dynamic>{};
-    args.putIfAbsent("startupFeature", () => startupFeature.toNativeValue());
-    return await channel?.invokeMethod<bool>(
-            'isStartupFeatureSupported', args) ??
-        false;
-  }
-
-  @override
-  void dispose() {
-    // empty
   }
 }
 

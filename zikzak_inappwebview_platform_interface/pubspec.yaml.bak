@@ -1,6 +1,6 @@
 name: zikzak_inappwebview_platform_interface
 description: A common platform interface for the zikzak_inappwebview plugin.
-version: 1.8.0
+version: 1.7.0
 homepage: https://inappwebview.dev/
 repository: https://github.com/arrrrny/zikzak_inappwebview/tree/master/zikzak_inappwebview_platform_interface
 issue_tracker: https://github.com/arrrrny/zikzak_inappwebview/issues
@@ -18,6 +18,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  zikzak_inappwebview_internal_annotations:
+    path: ../zikzak_inappwebview_internal_annotations
   plugin_platform_interface: ^2.1.6
 
 dev_dependencies:
@@ -25,8 +27,8 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^2.0.0
   build_runner: ^2.4.0
-  # generators:
-  #   path: ../dev_packages/generators
+  generators:
+    path: ../dev_packages/generators
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
