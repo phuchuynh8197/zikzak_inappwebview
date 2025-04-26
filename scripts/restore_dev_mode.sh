@@ -34,7 +34,7 @@ update_for_dev_mode() {
 
 
   # Replace zikzak_inappwebview_platform_interface dependency
-  sed -i.tmp -E 's|zikzak_inappwebview_internal_annotations: \^[0-9]+\.[0-9]+\.[0-9]+|zikzak_inappwebview_internal_annotations:\n    path: ../zikzak_inappwebview_internal_annotations|g' "$pubspec_file"
+  sed -i.tmp -E 's|zikzak_inappwebview_platform_interface: \^[0-9]+\.[0-9]+\.[0-9]+|zikzak_inappwebview_platform_interface:\n    path: ../zikzak_inappwebview_platform_interface|g' "$pubspec_file"
 
   # Replace android dependency
   sed -i.tmp -E 's|zikzak_inappwebview_android: \^[0-9]+\.[0-9]+\.[0-9]+|zikzak_inappwebview_android:\n    path: ../zikzak_inappwebview_android|g' "$pubspec_file"

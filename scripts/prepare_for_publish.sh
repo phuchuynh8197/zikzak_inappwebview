@@ -34,7 +34,6 @@ echo -e "${GREEN}Created branch: $BRANCH_NAME${NC}"
 
 # List of all packages to update
 PACKAGES=(
-    "zikzak_inappwebview_internal_annotations"
     "zikzak_inappwebview_platform_interface"
     "zikzak_inappwebview_android"
     "zikzak_inappwebview_ios"

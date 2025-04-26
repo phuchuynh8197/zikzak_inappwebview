@@ -347,49 +347,49 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
   zikzak_inappwebview_android:
     dependency: "direct overridden"
     description:
       path: "../../zikzak_inappwebview_android"
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
   zikzak_inappwebview_ios:
     dependency: "direct overridden"
     description:
       path: "../../zikzak_inappwebview_ios"
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
   zikzak_inappwebview_macos:
     dependency: "direct overridden"
     description:
       path: "../../zikzak_inappwebview_macos"
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
   zikzak_inappwebview_platform_interface:
     dependency: "direct overridden"
     description:
       path: "../../zikzak_inappwebview_platform_interface"
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
   zikzak_inappwebview_web:
     dependency: "direct overridden"
     description:
       path: "../../zikzak_inappwebview_web"
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
   zikzak_inappwebview_windows:
     dependency: "direct overridden"
     description:
       path: "../../zikzak_inappwebview_windows"
       relative: true
     source: path
-    version: "1.7.0"
+    version: "1.8.0"
 sdks:
   dart: ">=3.7.0-0 <4.0.0"
   flutter: ">=3.24.0"
