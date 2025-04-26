@@ -109,64 +109,7 @@ for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inapp
     fi
 done
 
-# Update all dependencies in the main package
-if [ -f "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" ]; then
-    echo -e "${YELLOW}Updating all dependencies in main package${NC}"
 
-    # Process each package dependency one by one
-    for dep_pkg in "zikzak_inappwebview_internal_annotations" "zikzak_inappwebview_platform_interface" "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
-        awk -v pkg="$dep_pkg" -v version="$VERSION" '
-        {
-            if ($0 ~ pkg ":") {
-                if ($0 ~ "^  " pkg ":$") {
-                    print "  " pkg ": ^" version;
-                    getline; # skip the path line if it exists
-                    if ($0 !~ /path:/) {
-                        print $0; # if not a path line, print it
-                    }
-                } else {
-                    print "  " pkg ": ^" version;
-                }
-            } else if ($0 ~ "path: ..\\/" pkg) {
-                # Skip path lines
-            } else {
-                print $0;
-            }
-        }' "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" > "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new"
-
-        mv "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new" "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml"
-    done
-else
-    echo -e "${RED}Warning: pubspec.yaml not found for main package. Skipping.${NC}"
-fi
-
-# Update generators package to use hosted dependency instead of path
-if [ -f "$ROOT_DIR/dev_packages/generators/pubspec.yaml" ]; then
-    echo -e "${YELLOW}Updating internal_annotations dependency in generators package${NC}"
-    awk -v version="$VERSION" '
-    {
-        if ($0 ~ /zikzak_inappwebview_internal_annotations:/) {
-            if ($0 ~ /^  zikzak_inappwebview_internal_annotations:$/) {
-                print "  zikzak_inappwebview_internal_annotations: ^" version;
-                getline; # skip the path line if it exists
-                if ($0 !~ /path:/) {
-                    print $0; # if not a path line, print it
-                }
-            } else {
-                print "  zikzak_inappwebview_internal_annotations: ^" version;
-            }
-        } else if ($0 ~ /path: ..\/..\/zikzak_inappwebview_internal_annotations/) {
-            # Skip path lines
-        } else {
-            print $0;
-        }
-    }' "$ROOT_DIR/dev_packages/generators/pubspec.yaml" > "$ROOT_DIR/dev_packages/generators/pubspec.yaml.new"
-
-    mv "$ROOT_DIR/dev_packages/generators/pubspec.yaml.new" "$ROOT_DIR/dev_packages/generators/pubspec.yaml"
-    echo -e "${GREEN}Successfully updated generators package to use hosted dependency${NC}"
-else
-    echo -e "${RED}Warning: pubspec.yaml not found for generators package. Skipping.${NC}"
-fi
 
 # Ask for the commit message that will be used for both Git commit and CHANGELOG files
 echo -e "${YELLOW}Enter a commit/changelog message for version $VERSION (default: 'Prepare for publishing version $VERSION'):${NC}"
