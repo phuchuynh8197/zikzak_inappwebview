@@ -1,140 +1,301 @@
 #!/bin/bash
-# ZikZak InAppWebView 2.0.0 
-# -------------------------
-# prepare_for_publish.sh
-# 
-# This script converts all path dependencies back to version dependencies
-# for publishing to pub.dev, ensuring proper versioning and compatibility.
-#
+set -e
 
-echo "🔥 ZikZak InAppWebView - Preparing for Publication 🔥"
-echo "Converting all path dependencies to version dependencies..."
+# Color codes for better readability
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[1;33m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
 
-# Root directory of the project
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-echo "Root directory: $ROOT_DIR"
+# Check if version argument is provided
+if [ "$#" -ne 1 ]; then
+    echo -e "${RED}Error: Version number is required.${NC}"
+    echo -e "Usage: $0 <version_number>"
+    echo -e "Example: $0 1.2.5"
+    exit 1
+fi
 
-# Version constants - update these before publishing
-PLATFORM_INTERFACE_VERSION="2.0.0"
-ANDROID_VERSION="2.0.0"
-IOS_VERSION="2.0.0"
-MACOS_VERSION="2.0.0"
-WEB_VERSION="2.0.0"
-WINDOWS_VERSION="2.0.0"
-MAIN_VERSION="2.0.0"
+VERSION=$1
+BRANCH_NAME="publish-$VERSION"
+ROOT_DIR="$(pwd)"
 
-# Function to update pubspec.yaml for publication
-update_for_publication() {
-  local package_dir=$1
-  local pubspec_file="$package_dir/pubspec.yaml"
-  local package_name=$(basename "$package_dir")
-  
-  if [ ! -f "$pubspec_file" ]; then
-    echo "⚠️ Pubspec file not found at $pubspec_file"
-    return
-  fi
-  
-  echo "Processing $pubspec_file"
-  
-  # Backup pubspec file
-  cp "$pubspec_file" "${pubspec_file}.dev"
-  
-  # Replace platform interface path dependency with version
-  sed -i.tmp -E 's|zikzak_inappwebview_platform_interface:.*\n.*path:.*|zikzak_inappwebview_platform_interface: ^'$PLATFORM_INTERFACE_VERSION'|g' "$pubspec_file"
-  
-  # Replace android path dependency with version
-  sed -i.tmp -E 's|zikzak_inappwebview_android:.*\n.*path:.*|zikzak_inappwebview_android: ^'$ANDROID_VERSION'|g' "$pubspec_file"
-  
-  # Replace iOS path dependency with version
-  sed -i.tmp -E 's|zikzak_inappwebview_ios:.*\n.*path:.*|zikzak_inappwebview_ios: ^'$IOS_VERSION'|g' "$pubspec_file"
-  
-  # Replace macOS path dependency with version
-  sed -i.tmp -E 's|zikzak_inappwebview_macos:.*\n.*path:.*|zikzak_inappwebview_macos: ^'$MACOS_VERSION'|g' "$pubspec_file"
-  
-  # Replace web path dependency with version
-  sed -i.tmp -E 's|zikzak_inappwebview_web:.*\n.*path:.*|zikzak_inappwebview_web: ^'$WEB_VERSION'|g' "$pubspec_file"
-  
-  # Replace Windows path dependency with version
-  sed -i.tmp -E 's|zikzak_inappwebview_windows:.*\n.*path:.*|zikzak_inappwebview_windows: ^'$WINDOWS_VERSION'|g' "$pubspec_file"
-  
-  # Update the version in the pubspec
-  if [ "$package_name" = "zikzak_inappwebview" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$MAIN_VERSION'|g' "$pubspec_file"
-  elif [ "$package_name" = "zikzak_inappwebview_platform_interface" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$PLATFORM_INTERFACE_VERSION'|g' "$pubspec_file"
-  elif [ "$package_name" = "zikzak_inappwebview_android" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$ANDROID_VERSION'|g' "$pubspec_file"
-  elif [ "$package_name" = "zikzak_inappwebview_ios" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$IOS_VERSION'|g' "$pubspec_file"
-  elif [ "$package_name" = "zikzak_inappwebview_macos" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$MACOS_VERSION'|g' "$pubspec_file"
-  elif [ "$package_name" = "zikzak_inappwebview_web" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$WEB_VERSION'|g' "$pubspec_file"
-  elif [ "$package_name" = "zikzak_inappwebview_windows" ]; then
-    sed -i.tmp -E 's|version: [0-9]+\.[0-9]+\.[0-9]+.*|version: '$WINDOWS_VERSION'|g' "$pubspec_file"
-  fi
-  
-  # Clean up temporary files
-  rm -f "${pubspec_file}.tmp"
-  
-  echo "✅ Updated $pubspec_file for publication with version dependencies"
+# Validate semantic version format (simple check)
+if ! [[ $VERSION =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo -e "${RED}Error: Version should follow semantic versioning (e.g., 1.2.5)${NC}"
+    exit 1
+fi
+
+echo -e "${BLUE}=== Preparing to publish version $VERSION ===${NC}"
+
+# Create a new branch for publishing
+git checkout -b $BRANCH_NAME
+echo -e "${GREEN}Created branch: $BRANCH_NAME${NC}"
+
+# List of all packages to update
+PACKAGES=(
+    "zikzak_inappwebview_internal_annotations"
+    "zikzak_inappwebview_platform_interface"
+    "zikzak_inappwebview_android"
+    "zikzak_inappwebview_ios"
+    "zikzak_inappwebview_macos"
+    "zikzak_inappwebview_web"
+    "zikzak_inappwebview_windows"
+    "zikzak_inappwebview"
+)
+
+# Update versions in all package pubspec.yaml files
+for pkg in "${PACKAGES[@]}"; do
+    echo -e "${BLUE}Updating version in $pkg to $VERSION${NC}"
+    # Check if the package directory exists
+    if [ ! -d "$ROOT_DIR/$pkg" ]; then
+        echo -e "${RED}Warning: Package directory '$pkg' not found. Skipping.${NC}"
+        continue
+    fi
+
+    # Update version in pubspec.yaml
+    if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
+        # Use awk for reliable version replacement
+        awk -v version="$VERSION" '{
+            if ($0 ~ /^version:/) {
+                print "version: " version;
+            } else {
+                print $0;
+            }
+        }' "$ROOT_DIR/$pkg/pubspec.yaml" > "$ROOT_DIR/$pkg/pubspec.yaml.new"
+
+        mv "$ROOT_DIR/$pkg/pubspec.yaml.new" "$ROOT_DIR/$pkg/pubspec.yaml"
+
+        # Verify the update
+        new_version=$(grep "^version:" "$ROOT_DIR/$pkg/pubspec.yaml" | sed 's/version: //' | tr -d '[:space:]')
+        if [ "$new_version" != "$VERSION" ]; then
+            echo -e "${RED}Failed to update version for $pkg to $VERSION. Current version: $new_version${NC}"
+        else
+            echo -e "${GREEN}Successfully updated $pkg to version $VERSION${NC}"
+        fi
+    else
+        echo -e "${RED}Warning: pubspec.yaml not found in $pkg. Skipping.${NC}"
+    fi
+done
+
+# Update dependencies in each package to use versioned dependencies instead of path
+echo -e "${BLUE}Updating dependencies to use versioned references${NC}"
+
+# First update internal_annotations dependency in platform_interface
+if [ -f "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml" ]; then
+    echo -e "${YELLOW}Updating internal_annotations dependency in platform_interface${NC}"
+    awk -v version="$VERSION" '
+    {
+        if ($0 ~ /zikzak_inappwebview_internal_annotations:/) {
+            if ($0 ~ /^  zikzak_inappwebview_internal_annotations:$/) {
+                print "  zikzak_inappwebview_internal_annotations: ^" version;
+                getline; # skip the path line if it exists
+                if ($0 !~ /path:/) {
+                    print $0; # if not a path line, print it
+                }
+            } else {
+                print "  zikzak_inappwebview_internal_annotations: ^" version;
+            }
+        } else if ($0 ~ /path: ..\/zikzak_inappwebview_internal_annotations/) {
+            # Skip path lines
+        } else {
+            print $0;
+        }
+    }' "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml" > "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml.new"
+
+    mv "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml.new" "$ROOT_DIR/zikzak_inappwebview_platform_interface/pubspec.yaml"
+fi
+
+# Update platform_interface dependency in all platform packages
+for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
+    if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
+        echo -e "${YELLOW}Updating platform_interface dependency in $pkg${NC}"
+        awk -v version="$VERSION" '
+        {
+            if ($0 ~ /zikzak_inappwebview_platform_interface:/) {
+                if ($0 ~ /^  zikzak_inappwebview_platform_interface:$/) {
+                    print "  zikzak_inappwebview_platform_interface: ^" version;
+                    getline; # skip the path line if it exists
+                    if ($0 !~ /path:/) {
+                        print $0; # if not a path line, print it
+                    }
+                } else {
+                    print "  zikzak_inappwebview_platform_interface: ^" version;
+                }
+            } else if ($0 ~ /path: ..\/zikzak_inappwebview_platform_interface/) {
+                # Skip path lines
+            } else {
+                print $0;
+            }
+        }' "$ROOT_DIR/$pkg/pubspec.yaml" > "$ROOT_DIR/$pkg/pubspec.yaml.new"
+
+        mv "$ROOT_DIR/$pkg/pubspec.yaml.new" "$ROOT_DIR/$pkg/pubspec.yaml"
+    else
+        echo -e "${RED}Warning: pubspec.yaml not found in $pkg. Skipping.${NC}"
+    fi
+done
+
+# Update all dependencies in the main package
+if [ -f "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" ]; then
+    echo -e "${YELLOW}Updating all dependencies in main package${NC}"
+
+    # Process each package dependency one by one
+    for dep_pkg in "zikzak_inappwebview_internal_annotations" "zikzak_inappwebview_platform_interface" "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
+        awk -v pkg="$dep_pkg" -v version="$VERSION" '
+        {
+            if ($0 ~ pkg ":") {
+                if ($0 ~ "^  " pkg ":$") {
+                    print "  " pkg ": ^" version;
+                    getline; # skip the path line if it exists
+                    if ($0 !~ /path:/) {
+                        print $0; # if not a path line, print it
+                    }
+                } else {
+                    print "  " pkg ": ^" version;
+                }
+            } else if ($0 ~ "path: ..\\/" pkg) {
+                # Skip path lines
+            } else {
+                print $0;
+            }
+        }' "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" > "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new"
+
+        mv "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new" "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml"
+    done
+else
+    echo -e "${RED}Warning: pubspec.yaml not found for main package. Skipping.${NC}"
+fi
+
+# Update generators package to use hosted dependency instead of path
+if [ -f "$ROOT_DIR/dev_packages/generators/pubspec.yaml" ]; then
+    echo -e "${YELLOW}Updating internal_annotations dependency in generators package${NC}"
+    awk -v version="$VERSION" '
+    {
+        if ($0 ~ /zikzak_inappwebview_internal_annotations:/) {
+            if ($0 ~ /^  zikzak_inappwebview_internal_annotations:$/) {
+                print "  zikzak_inappwebview_internal_annotations: ^" version;
+                getline; # skip the path line if it exists
+                if ($0 !~ /path:/) {
+                    print $0; # if not a path line, print it
+                }
+            } else {
+                print "  zikzak_inappwebview_internal_annotations: ^" version;
+            }
+        } else if ($0 ~ /path: ..\/..\/zikzak_inappwebview_internal_annotations/) {
+            # Skip path lines
+        } else {
+            print $0;
+        }
+    }' "$ROOT_DIR/dev_packages/generators/pubspec.yaml" > "$ROOT_DIR/dev_packages/generators/pubspec.yaml.new"
+
+    mv "$ROOT_DIR/dev_packages/generators/pubspec.yaml.new" "$ROOT_DIR/dev_packages/generators/pubspec.yaml"
+    echo -e "${GREEN}Successfully updated generators package to use hosted dependency${NC}"
+else
+    echo -e "${RED}Warning: pubspec.yaml not found for generators package. Skipping.${NC}"
+fi
+
+# Ask for the commit message that will be used for both Git commit and CHANGELOG files
+echo -e "${YELLOW}Enter a commit/changelog message for version $VERSION (default: 'Prepare for publishing version $VERSION'):${NC}"
+read -r COMMIT_MESSAGE
+if [ -z "$COMMIT_MESSAGE" ]; then
+    COMMIT_MESSAGE="Prepare for publishing version $VERSION"
+fi
+
+# Update CHANGELOG.md files with new version
+CURRENT_DATE=$(date +"%Y-%m-%d")
+for pkg in "${PACKAGES[@]}"; do
+    if [ -f "$ROOT_DIR/$pkg/CHANGELOG.md" ]; then
+        echo -e "${BLUE}Updating CHANGELOG.md in $pkg${NC}"
+        # Add new version entry at the top of the CHANGELOG with the commit message
+        sed -i '' "1s/^/## $VERSION - $CURRENT_DATE\n\n* $COMMIT_MESSAGE\n* Updated dependencies to use hosted references\n\n/" "$ROOT_DIR/$pkg/CHANGELOG.md"
+    else
+        echo -e "${RED}Warning: CHANGELOG.md not found in $pkg. Creating new CHANGELOG.md${NC}"
+        echo -e "## $VERSION - $CURRENT_DATE\n\n* $COMMIT_MESSAGE\n* Updated dependencies to use hosted references\n" > "$ROOT_DIR/$pkg/CHANGELOG.md"
+    fi
+done
+
+# Function to check if a package version is already published on pub.dev
+check_package_on_pubdev() {
+    local package_name=$1
+    local version=$2
+
+    echo -e "${YELLOW}Checking if $package_name version $version is already on pub.dev...${NC}"
+
+    # Use curl to query the pub.dev API
+    local response=$(curl -s "https://pub.dev/api/packages/$package_name")
+    local http_code=$(curl -s -o /dev/null -w "%{http_code}" "https://pub.dev/api/packages/$package_name")
+
+    # Check if the package exists
+    if [ "$http_code" != "200" ]; then
+        echo -e "${BLUE}Package $package_name not found on pub.dev. Will be published for the first time.${NC}"
+        return 1
+    fi
+
+    # Check if the version exists in the package versions
+    if echo "$response" | grep -q "\"version\":\"$version\""; then
+        echo -e "${RED}Version $version of $package_name is already published on pub.dev!${NC}"
+        return 0
+    else
+        echo -e "${GREEN}Version $version of $package_name is not yet published. Ready to publish.${NC}"
+        return 1
+    fi
 }
 
-# Process each package
-echo "Updating package versions and dependencies..."
-for package in zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows zikzak_inappwebview; do
-  if [ -d "$ROOT_DIR/$package" ]; then
-    update_for_publication "$ROOT_DIR/$package"
-  else
-    echo "⚠️ Directory not found: $ROOT_DIR/$package"
-  fi
-done
+# Check all packages on pub.dev and display a summary
+echo -e "${BLUE}\n=== Checking packages on pub.dev ===${NC}"
+declare -A package_status
 
-# Verify changelog files exist and are updated
-echo "Verifying CHANGELOG.md files..."
-for package in zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows zikzak_inappwebview; do
-  changelog_file="$ROOT_DIR/$package/CHANGELOG.md"
-  if [ -f "$changelog_file" ]; then
-    if ! grep -q "## 2.0.0" "$changelog_file"; then
-      echo "⚠️ WARNING: CHANGELOG.md in $package does not contain an entry for version 2.0.0"
-      echo "   Please update the changelog before publishing!"
+for pkg in "${PACKAGES[@]}"; do
+    # Extract package name from directory
+    pkg_name=$(basename "$pkg")
+
+    if check_package_on_pubdev "$pkg_name" "$VERSION"; then
+        package_status["$pkg_name"]="Already published"
     else
-      echo "✅ CHANGELOG.md in $package is ready for version 2.0.0"
+        package_status["$pkg_name"]="Not published (ready to publish)"
     fi
-  else
-    echo "⚠️ CHANGELOG.md not found in $package"
-  fi
 done
 
-# Run flutter pub get on all packages
-echo "Running 'flutter pub get' on all packages..."
-for package in zikzak_inappwebview zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows; do
-  if [ -d "$ROOT_DIR/$package" ]; then
-    echo "Getting dependencies for $package..."
-    (cd "$ROOT_DIR/$package" && flutter pub get)
-  fi
+# Display publication status summary
+echo -e "${BLUE}\n=== Publication Status Summary ===${NC}"
+for pkg_name in "${!package_status[@]}"; do
+    status="${package_status[$pkg_name]}"
+    if [[ "$status" == "Already published" ]]; then
+        echo -e "${pkg_name}: ${RED}$status${NC}"
+    else
+        echo -e "${pkg_name}: ${GREEN}$status${NC}"
+    fi
 done
 
-# Run flutter analyze to check for any issues
-echo "Running 'flutter analyze' to check for issues..."
-for package in zikzak_inappwebview zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows; do
-  if [ -d "$ROOT_DIR/$package" ]; then
-    echo "Analyzing $package..."
-    (cd "$ROOT_DIR/$package" && flutter analyze)
-  fi
-done
+echo -e "${GREEN}All packages updated to version $VERSION with versioned dependencies${NC}"
 
-echo ""
-echo "🚀 Publication preparation complete!"
-echo "Packages are ready to be published in the following order:"
-echo "1. zikzak_inappwebview_platform_interface"
-echo "2. zikzak_inappwebview_android, zikzak_inappwebview_ios, zikzak_inappwebview_macos, zikzak_inappwebview_web, zikzak_inappwebview_windows"
-echo "3. zikzak_inappwebview (main package)"
-echo ""
-echo "To publish each package, run:"
-echo "  cd [package_directory]"
-echo "  flutter pub publish"
-echo ""
-echo "To restore development mode after publishing, run:"
-echo "  ./scripts/restore_dev_mode.sh"
-echo ""
+# Ask user if they want to review changes first
+echo -e "${YELLOW}Would you like to review the changes before committing? (y/n)${NC}"
+read -r review_choice
+if [[ "$review_choice" == "y" || "$review_choice" == "Y" ]]; then
+    git diff
+fi
+
+# Ask if user wants to modify CHANGELOG files
+echo -e "${YELLOW}Would you like to modify CHANGELOG.md files to add more detailed release notes? (y/n)${NC}"
+read -r changelog_choice
+if [[ "$changelog_choice" == "y" || "$changelog_choice" == "Y" ]]; then
+    echo -e "${BLUE}Please edit the CHANGELOG.md files now. Press Enter when done.${NC}"
+    read -r
+fi
+
+# Automatically commit changes
+echo -e "${BLUE}Committing changes...${NC}"
+git add .
+git commit -m "Prepare for publishing version $VERSION"
+echo -e "${GREEN}Changes committed successfully!${NC}"
+
+echo -e "${YELLOW}Next steps:${NC}"
+echo -e "1. Publish packages in order using the publish.sh script"
+echo -e "2. After publishing, switch back to main branch: git checkout main"
+echo -e ""
+echo -e "${BLUE}To revert to development setup (path dependencies), use:${NC}"
+echo -e "./scripts/restore_dev_setup.sh"
+echo -e ""
+echo -e "${RED}To completely revert all publish changes (including git branch):${NC}"
+echo -e "./scripts/revert_publish_changes.sh"
