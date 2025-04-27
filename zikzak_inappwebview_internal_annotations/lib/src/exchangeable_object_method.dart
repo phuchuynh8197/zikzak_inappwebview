@@ -4,6 +4,6 @@ class ExchangeableObjectMethod {
 
   const ExchangeableObjectMethod({
     this.ignore = false,
-    this.toMapMergeWith = false
+    this.toMapMergeWith = false,
   });
 }

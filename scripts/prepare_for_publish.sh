@@ -85,8 +85,15 @@ for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inapp
     if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
         echo -e "${YELLOW}Updating platform_interface dependency in $pkg${NC}"
         awk -v version="$VERSION" '
+        BEGIN { in_dev_dependencies = 0 }
         {
-            if ($0 ~ /zikzak_inappwebview_platform_interface:/) {
+            # Track when we enter/exit dev_dependencies section
+            if ($0 ~ /^dev_dependencies:/) {
+                in_dev_dependencies = 1;
+                print $0;
+            } 
+            # Handle platform_interface dependency in regular dependencies
+            else if (!in_dev_dependencies && $0 ~ /zikzak_inappwebview_platform_interface:/) {
                 if ($0 ~ /^  zikzak_inappwebview_platform_interface:$/) {
                     print "  zikzak_inappwebview_platform_interface: ^" version;
                     getline; # skip the path line if it exists
@@ -96,9 +103,21 @@ for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inapp
                 } else {
                     print "  zikzak_inappwebview_platform_interface: ^" version;
                 }
-            } else if ($0 ~ /path: ..\/zikzak_inappwebview_platform_interface/) {
+            } 
+            # Comment out path dependencies in dev_dependencies section
+            else if (in_dev_dependencies && $0 ~ /path: ..\/zikzak_inappwebview/) {
+                print "    #" $0 " # Commented for publishing";
+            }
+            # Skip path lines in regular dependencies
+            else if (!in_dev_dependencies && $0 ~ /path: ..\/zikzak_inappwebview_platform_interface/) {
                 # Skip path lines
-            } else {
+            }
+            # Reset the flag when exiting dev_dependencies section
+            else if (in_dev_dependencies && $0 ~ /^[a-zA-Z]/) {
+                in_dev_dependencies = 0;
+                print $0;
+            }
+            else {
                 print $0;
             }
         }' "$ROOT_DIR/$pkg/pubspec.yaml" > "$ROOT_DIR/$pkg/pubspec.yaml.new"
@@ -109,7 +128,36 @@ for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inapp
     fi
 done
 
+# Update all dependencies in the main package
+if [ -f "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" ]; then
+    echo -e "${YELLOW}Updating all dependencies in main package${NC}"
 
+    # Process each package dependency one by one
+    for dep_pkg in "zikzak_inappwebview_internal_annotations" "zikzak_inappwebview_platform_interface" "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
+        awk -v pkg="$dep_pkg" -v version="$VERSION" '
+        {
+            if ($0 ~ pkg ":") {
+                if ($0 ~ "^  " pkg ":$") {
+                    print "  " pkg ": ^" version;
+                    getline; # skip the path line if it exists
+                    if ($0 !~ /path:/) {
+                        print $0; # if not a path line, print it
+                    }
+                } else {
+                    print "  " pkg ": ^" version;
+                }
+            } else if ($0 ~ "path: ..\\/" pkg) {
+                # Skip path lines
+            } else {
+                print $0;
+            }
+        }' "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" > "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new"
+
+        mv "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new" "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml"
+    done
+else
+    echo -e "${RED}Warning: pubspec.yaml not found for main package. Skipping.${NC}"
+fi
 
 # Ask for the commit message that will be used for both Git commit and CHANGELOG files
 echo -e "${YELLOW}Enter a commit/changelog message for version $VERSION (default: 'Prepare for publishing version $VERSION'):${NC}"

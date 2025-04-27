@@ -77,12 +77,13 @@ class WebPlatform implements Platform {
   final String? note;
   final bool requiresSameOrigin;
 
-  const WebPlatform(
-      {this.available,
-      this.apiName,
-      this.apiUrl,
-      this.note,
-      this.requiresSameOrigin = true});
+  const WebPlatform({
+    this.available,
+    this.apiName,
+    this.apiUrl,
+    this.note,
+    this.requiresSameOrigin = true,
+  });
 
   final name = "Web";
   final targetPlatformName = "web";

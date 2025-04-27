@@ -21,7 +21,8 @@ dependencies:
   flutter_web_plugins:
     sdk: flutter
   js: ^0.7.1
-  zikzak_inappwebview_platform_interface: ^2.0.0
+  zikzak_inappwebview_platform_interface:
+    path: ../zikzak_inappwebview_platform_interface
 
 dev_dependencies:
   flutter_test:

@@ -14,6 +14,6 @@ class ExchangeableObject {
     this.fromMapForceAllInline = false,
     this.nullableFromMapFactory = true,
     this.toStringMethod = true,
-    this.copyMethod = false
+    this.copyMethod = false,
   });
 }
