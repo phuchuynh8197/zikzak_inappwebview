@@ -60,12 +60,6 @@ class AndroidWebViewFeature extends PlatformWebViewFeature
         const PlatformWebViewFeatureCreationParams()));
     return _instance!;
   }
-
-  @override
-  UnimplementedError(p1) {
-    // TODO: implement UnimplementedError
-    throw UnimplementedError(p1);
-  }
 }
 
 /// Object specifying creation parameters for creating a [AndroidWebViewFeature].
