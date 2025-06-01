@@ -8,7 +8,7 @@ Thanks to Lorenzo Pichilli and all the contributors for their hard work!
 
 </div>
 
-## New Plugin with a new maintainer 1.x.x is OUT NOW!
+## New Plugin with a new maintainer 2.x.x is OUT NOW!
 
 ## Requirements
 
