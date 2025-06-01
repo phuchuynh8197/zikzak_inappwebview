@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'zikzak_inappwebview_ios'
-  s.version          = '1.1.0'
+  s.version          = '2.2.0'
   s.summary          = 'IOS implementation of the inappwebview plugin for Flutter.'
   s.description      = <<-DESC
 A new Flutter plugin.
@@ -19,13 +19,20 @@ A new Flutter plugin.
   s.dependency 'Flutter'
 
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
-  s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64',
+    'SWIFT_VERSION' => '5.0',
+    'ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES' => 'YES',
+  }
 
   s.libraries = 'swiftCoreGraphics'
 
   s.xcconfig = {
       'LIBRARY_SEARCH_PATHS' => '$(SDKROOT)/usr/lib/swift',
   }
+
+  s.frameworks = 'WebKit'
 
   s.swift_version = '5.0'
 
