@@ -188,4 +188,4 @@ echo -e "2. ${YELLOW}To completely revert all publish changes (switch back to ma
 echo -e "   ./scripts/revert_publish_changes.sh"
 echo -e ""
 echo -e "3. ${YELLOW}To merge all changes into main and push:${NC}"
-echo -e "   ./scripts/push_to_main.sh"
+echo -e "   ./scripts/push_to_master.sh"

@@ -1,3 +1,8 @@
+## 2.2.0 - 2025-06-01
+
+* fix  missing dynamic library error for libswiftWebKit.dylib
+* Updated dependencies to use hosted references
+
 ## 2.1.0 - 2025-04-27
 
 * fixed dependencies
