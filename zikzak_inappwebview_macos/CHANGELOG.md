@@ -1,3 +1,8 @@
+## 2.4.2 - 2025-06-16
+
+* bump OrderedSet to 6.0.3 to satisfy Xcode 16
+* Updated dependencies to use hosted references
+
 ## 2.4.1 - 2025-06-15
 
 * published to cocoapods
