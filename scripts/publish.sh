@@ -53,7 +53,7 @@ check_package_on_pubdev() {
 # Function to check if all dependencies of a package are available on pub.dev
 check_dependencies() {
     local package_dir="$1"
-    local max_retries=5
+    local max_retries=10
     local retry_interval=60
 
     # Extract package version from pubspec.yaml
@@ -136,20 +136,13 @@ publish_package() {
     echo -e "${BLUE}Analyzing package...${NC}"
     flutter analyze
 
-    # Publish with confirmation
+    # Publish with dry-run first
     echo -e "${BLUE}Running dry-run...${NC}"
     flutter pub publish --dry-run
 
-    echo -e "${YELLOW}Ready to publish ${GREEN}$package_dir${YELLOW}? (y/n)${NC}"
-    read -r answer
-    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
-        echo -e "${BLUE}Publishing...${NC}"
-        flutter pub publish -f
-        echo -e "${GREEN}Package $package_dir published successfully!${NC}"
-    else
-        echo -e "${RED}Skipping $package_dir...${NC}"
-        return 1
-    fi
+    echo -e "${BLUE}Publishing...${NC}"
+    flutter pub publish -f
+    echo -e "${GREEN}Package $package_dir published successfully!${NC}"
 
     return 0
 }
