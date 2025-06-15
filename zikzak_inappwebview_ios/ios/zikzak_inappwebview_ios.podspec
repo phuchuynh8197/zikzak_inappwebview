@@ -16,12 +16,13 @@ iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView pl
   s.source_files = 'zikzak_inappwebview_ios/ios/Classes/**/*'
   s.resources = 'zikzak_inappwebview_ios/ios/Storyboards/**/*.storyboard'
   s.public_header_files = 'zikzak_inappwebview_ios/ios/Classes/**/*.h'
-  s.dependency 'Flutter'
+
+  # Flutter dependency is conditionally added to avoid validation issues with libarclite
+  if !$VALIDATION_BUILD
+    s.dependency 'Flutter'
+  end
 
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
-  s.pod_target_xcconfig = {
-    'DEFINES_MODULE' => 'YES',
-  }
 
   # Removed obsolete Swift overlay libraries
 
@@ -39,4 +40,10 @@ iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView pl
   s.subspec 'Core' do |core|
     core.platform = :ios, '13.0'
   end
+
+  # Ensure all dependencies have minimum iOS 12.0 to avoid libarclite issues with Xcode 15+
+  s.pod_target_xcconfig = {
+    'DEFINES_MODULE' => 'YES',
+    'IPHONEOS_DEPLOYMENT_TARGET' => '13.0'
+  }
 end

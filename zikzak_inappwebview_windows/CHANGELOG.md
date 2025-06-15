@@ -1,3 +1,8 @@
+## 2.4.1 - 2025-06-15
+
+* published to cocoapods
+* Updated dependencies to use hosted references
+
 ## 2.4.0 - 2025-06-15
 
 * Removed obsolete LIBRARY_SEARCH_PATHS for Swift overlays
