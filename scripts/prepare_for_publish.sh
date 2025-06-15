@@ -102,33 +102,80 @@ for pkg in "${PACKAGES[@]}"; do
     fi
 done
 
+# Function to update dependencies from path to versioned
+update_dependencies() {
+    local file="$1"
+    local version="$2"
+
+    echo -e "${YELLOW}Updating dependencies in $file${NC}"
+
+    # Create a Python script to properly handle YAML dependency conversion
+    python3 - <<EOF
+import re
+import sys
+
+def convert_dependencies(content, version):
+    lines = content.split('\n')
+    result = []
+    i = 0
+
+    # List of packages to convert
+    packages = [
+        'zikzak_inappwebview_internal_annotations',
+        'zikzak_inappwebview_platform_interface',
+        'zikzak_inappwebview_android',
+        'zikzak_inappwebview_ios',
+        'zikzak_inappwebview_macos',
+        'zikzak_inappwebview_web',
+        'zikzak_inappwebview_windows'
+    ]
+
+    while i < len(lines):
+        line = lines[i]
+
+        # Check if this line is a dependency we want to convert
+        dependency_found = False
+        for pkg in packages:
+            # Match dependency line with or without version
+            if re.match(f'^  {re.escape(pkg)}:', line):
+                dependency_found = True
+                # Replace with versioned dependency
+                result.append(f'  {pkg}: ^{version}')
+
+                # Skip the next line if it's a path specification
+                if i + 1 < len(lines) and 'path:' in lines[i + 1]:
+                    i += 1  # Skip the path line
+                break
+
+        if not dependency_found:
+            result.append(line)
+
+        i += 1
+
+    return '\n'.join(result)
+
+# Read the file
+with open('$file', 'r') as f:
+    content = f.read()
+
+# Convert dependencies
+updated_content = convert_dependencies(content, '$version')
+
+# Write back to file
+with open('$file', 'w') as f:
+    f.write(updated_content)
+
+print(f"Updated dependencies in $file")
+EOF
+}
+
 # Update dependencies in each package to use versioned dependencies instead of path
 echo -e "${BLUE}Updating dependencies to use versioned references${NC}"
 
 # Update platform_interface dependency in all platform packages
 for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
     if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
-        echo -e "${YELLOW}Updating platform_interface dependency in $pkg${NC}"
-        awk -v version="$VERSION" '
-        {
-            if ($0 ~ /zikzak_inappwebview_platform_interface:/) {
-                if ($0 ~ /^  zikzak_inappwebview_platform_interface:$/) {
-                    print "  zikzak_inappwebview_platform_interface: ^" version;
-                    getline; # skip the path line if it exists
-                    if ($0 !~ /path:/) {
-                        print $0; # if not a path line, print it
-                    }
-                } else {
-                    print "  zikzak_inappwebview_platform_interface: ^" version;
-                }
-            } else if ($0 ~ /path: ..\/zikzak_inappwebview_platform_interface/) {
-                # Skip path lines
-            } else {
-                print $0;
-            }
-        }' "$ROOT_DIR/$pkg/pubspec.yaml" > "$ROOT_DIR/$pkg/pubspec.yaml.new"
-
-        mv "$ROOT_DIR/$pkg/pubspec.yaml.new" "$ROOT_DIR/$pkg/pubspec.yaml"
+        update_dependencies "$ROOT_DIR/$pkg/pubspec.yaml" "$VERSION"
     else
         echo -e "${RED}Warning: pubspec.yaml not found in $pkg. Skipping.${NC}"
     fi
@@ -136,31 +183,7 @@ done
 
 # Update all dependencies in the main package
 if [ -f "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" ]; then
-    echo -e "${YELLOW}Updating all dependencies in main package${NC}"
-
-    # Process each package dependency one by one
-    for dep_pkg in "zikzak_inappwebview_internal_annotations" "zikzak_inappwebview_platform_interface" "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
-        awk -v pkg="$dep_pkg" -v version="$VERSION" '
-        {
-            if ($0 ~ pkg ":") {
-                if ($0 ~ "^  " pkg ":$") {
-                    print "  " pkg ": ^" version;
-                    getline; # skip the path line if it exists
-                    if ($0 !~ /path:/) {
-                        print $0; # if not a path line, print it
-                    }
-                } else {
-                    print "  " pkg ": ^" version;
-                }
-            } else if ($0 ~ "path: ..\\/" pkg) {
-                # Skip path lines
-            } else {
-                print $0;
-            }
-        }' "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" > "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new"
-
-        mv "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml.new" "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml"
-    done
+    update_dependencies "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" "$VERSION"
 else
     echo -e "${RED}Warning: pubspec.yaml not found for main package. Skipping.${NC}"
 fi
@@ -238,6 +261,29 @@ for pkg_name in "${!package_status[@]}"; do
     fi
 done
 
+# Verify that no path dependencies remain
+echo -e "${BLUE}\n=== Verifying no path dependencies remain ===${NC}"
+found_path_deps=false
+
+for pkg in "${PACKAGES[@]}"; do
+    if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
+        if grep -q "path:" "$ROOT_DIR/$pkg/pubspec.yaml"; then
+            echo -e "${RED}Warning: Path dependencies still found in $pkg/pubspec.yaml${NC}"
+            echo -e "${YELLOW}Remaining path dependencies:${NC}"
+            grep -A1 -B1 "path:" "$ROOT_DIR/$pkg/pubspec.yaml"
+            found_path_deps=true
+        else
+            echo -e "${GREEN}✓ No path dependencies in $pkg${NC}"
+        fi
+    fi
+done
+
+if [ "$found_path_deps" = true ]; then
+    echo -e "\n${RED}⚠️  Some packages still have path dependencies. Please review and fix manually.${NC}"
+else
+    echo -e "\n${GREEN}✅ All path dependencies successfully converted to versioned dependencies!${NC}"
+fi
+
 echo -e "${GREEN}All packages updated to version $VERSION with versioned dependencies${NC}"
 
 # Ask user if they want to review changes first
@@ -270,4 +316,3 @@ echo -e "./scripts/restore_dev_setup.sh"
 echo -e ""
 echo -e "${RED}To completely revert all publish changes (including git branch):${NC}"
 echo -e "./scripts/revert_publish_changes.sh"
-asdfa
