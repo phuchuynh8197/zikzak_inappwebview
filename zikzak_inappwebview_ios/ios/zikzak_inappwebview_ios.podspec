@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'zikzak_inappwebview_ios'
-  s.version          = '2.4.1'
+  s.version          = '2.4.2'
   s.summary          = 'IOS implementation of the inappwebview plugin for Flutter.'
   s.description      = <<-DESC
 iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView plugin for Flutter applications with support for iOS 13.0+. This plugin provides a powerful WebView widget with extensive customization options and JavaScript communication capabilities.
@@ -17,10 +17,7 @@ iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView pl
   s.resources = 'zikzak_inappwebview_ios/ios/Storyboards/**/*.storyboard'
   s.public_header_files = 'zikzak_inappwebview_ios/ios/Classes/**/*.h'
 
-  # Flutter dependency is conditionally added to avoid validation issues with libarclite
-  if !$VALIDATION_BUILD
-    s.dependency 'Flutter'
-  end
+  s.dependency 'Flutter'
 
   # Flutter.framework does not contain a i386 slice. Only x86_64 simulators are supported.
 
@@ -33,7 +30,7 @@ iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView pl
   s.swift_version = '5.9'
 
   s.platforms = { :ios => '13.0' }
-  s.dependency 'OrderedSet', '~>5.0'
+  s.dependency 'OrderedSet', '>= 6.0.3'
 
   s.default_subspec = 'Core'
 
