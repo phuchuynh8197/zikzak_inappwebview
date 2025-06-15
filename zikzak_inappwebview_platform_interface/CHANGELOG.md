@@ -1,3 +1,8 @@
+## 2.3.0 - 2025-06-15
+
+* Updated to Android SDK 36 support
+* Updated dependencies to use hosted references
+
 ## 2.2.0 - 2025-06-01
 
 * fix  missing dynamic library error for libswiftWebKit.dylib

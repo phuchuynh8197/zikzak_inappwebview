@@ -35,7 +35,7 @@ update_for_dev_mode() {
 
   # Also convert versioned dev_dependencies to path dependencies
   awk '
-  BEGIN { 
+  BEGIN {
     in_dev_dependencies = 0;
     packages["zikzak_inappwebview_platform_interface"] = 1;
     packages["zikzak_inappwebview_internal_annotations"] = 1;
@@ -57,7 +57,7 @@ update_for_dev_mode() {
   in_dev_dependencies && /^  zikzak_inappwebview/ {
     pkg_name = $1;
     sub(/:$/, "", pkg_name);
-    
+
     if (packages[pkg_name]) {
       # If this is a package we care about, and its a versioned dep (not already path-based)
       if ($0 !~ /path:/) {
@@ -77,7 +77,7 @@ update_for_dev_mode() {
   # Print all other lines unchanged
   { print }
   ' "$pubspec_file" > "${pubspec_file}.new"
-  
+
   # Only move the new file if it was created successfully
   if [ -s "${pubspec_file}.new" ]; then
     mv "${pubspec_file}.new" "$pubspec_file"
@@ -141,17 +141,17 @@ read -r deep_clean_choice
 
 if [[ "$deep_clean_choice" == "y" || "$deep_clean_choice" == "Y" ]]; then
   echo "☢️ NUCLEAR CLEANING: PURGING ALL PUB CACHES ☢️"
-  
+
   # Delete .dart_tool directories to force complete rebuild
   find "$ROOT_DIR" -name ".dart_tool" -type d -exec rm -rf {} +
-  
-  # Clean Flutter build directories 
+
+  # Clean Flutter build directories
   find "$ROOT_DIR" -name "build" -type d -exec rm -rf {} +
-  
+
   # Run package cache cleaning
   echo "Purging Dart pub cache..."
   dart pub cache clean --all
-  
+
   # Run Flutter clean on each package
   for package in zikzak_inappwebview zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows; do
     if [ -d "$ROOT_DIR/$package" ]; then
@@ -159,7 +159,7 @@ if [[ "$deep_clean_choice" == "y" || "$deep_clean_choice" == "Y" ]]; then
       (cd "$ROOT_DIR/$package" && flutter clean)
     fi
   done
-  
+
   echo "🧨 NUCLEAR CLEANING COMPLETE! ALL CACHES OBLITERATED! 🧨"
 fi
 
@@ -173,18 +173,18 @@ for package in zikzak_inappwebview zikzak_inappwebview_android zikzak_inappwebvi
   if [ -f "$ROOT_DIR/$package/pubspec.yaml" ]; then
     # Check that the package has path dependencies and NO versioned dependencies
     # More robust pattern matching for commented path dependencies
-    commented_paths=$(grep -c "#.*path:.*\.\.\/zikzak_inappwebview.*# Commented for publishing" "$ROOT_DIR/$package/pubspec.yaml" || echo "0")
-    
+    commented_paths=$(grep "#.*path:.*\.\.\/zikzak_inappwebview.*# Commented for publishing" "$ROOT_DIR/$package/pubspec.yaml" 2>/dev/null | wc -l)
+
     # More robust pattern matching for versioned dependencies
-    versioned_deps=$(grep -c "zikzak_inappwebview.*: \^[0-9]" "$ROOT_DIR/$package/pubspec.yaml" || echo "0")
-    
+    versioned_deps=$(grep "zikzak_inappwebview.*: \^[0-9]" "$ROOT_DIR/$package/pubspec.yaml" 2>/dev/null | wc -l)
+
     # Check if we actually have the expected path dependencies
     expected_deps=0
     missing_path_deps=0
-    
+
     # Count ACTUAL path dependencies for zikzak packages
-    actual_path_deps=$(grep -c "path:.*\.\.\/zikzak_inappwebview" "$ROOT_DIR/$package/pubspec.yaml" || echo "0")
-    
+    actual_path_deps=$(grep "path:.*\.\.\/zikzak_inappwebview" "$ROOT_DIR/$package/pubspec.yaml" 2>/dev/null | wc -l)
+
     # Check if this is the main package that needs other dependencies
     if [ "$package" = "zikzak_inappwebview" ]; then
       # Main package should have several path dependencies to platform packages
@@ -199,17 +199,17 @@ for package in zikzak_inappwebview zikzak_inappwebview_android zikzak_inappwebvi
         missing_path_deps=1
       fi
     fi
-    
+
     if [ "$commented_paths" -gt 0 ]; then
       echo "⚠️ WARNING: $package still has $commented_paths commented path dependencies!"
       verify_issues=$((verify_issues + 1))
     fi
-    
+
     if [ "$versioned_deps" -gt 0 ]; then
       echo "⚠️ WARNING: $package still has $versioned_deps versioned dependencies!"
       verify_issues=$((verify_issues + 1))
     fi
-    
+
     if [ "$missing_path_deps" -gt 0 ]; then
       echo "⚠️ WARNING: $package is missing expected path dependencies! Found $actual_path_deps, expected ~$expected_deps"
       verify_issues=$((verify_issues + 1))

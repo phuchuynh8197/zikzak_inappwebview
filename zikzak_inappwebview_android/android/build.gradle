@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.0'
+        classpath 'com.android.tools.build:gradle:8.5.2'
     }
 }
 
@@ -26,7 +26,7 @@ android {
     if (project.android.hasProperty("namespace")) {
         namespace 'wtf.zikzak.zikzak_inappwebview_android'
     }
-    compileSdkVersion 35
+    compileSdkVersion 36
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -54,9 +54,9 @@ android {
         }
     }
     dependencies {
-        implementation 'androidx.webkit:webkit:1.8.0'
-        implementation 'androidx.browser:browser:1.6.0'
-        implementation 'androidx.appcompat:appcompat:1.6.1'
+        implementation 'androidx.webkit:webkit:1.13.0'
+        implementation 'androidx.browser:browser:1.8.0'
+        implementation 'androidx.appcompat:appcompat:1.7.0'
         implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     }
 }

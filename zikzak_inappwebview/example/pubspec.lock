@@ -354,14 +354,13 @@ packages:
       path: "../../zikzak_inappwebview_android"
       relative: true
     source: path
-    version: "2.2.0"
+    version: "2.3.0"
   zikzak_inappwebview_internal_annotations:
     dependency: transitive
     description:
-      name: zikzak_inappwebview_internal_annotations
-      sha256: e9e84dabaf159a16d6ff800bfc12d3186ca0a4ae33a7d65a16d6c287dba0decb
-      url: "https://pub.dev"
-    source: hosted
+      path: "../../zikzak_inappwebview_internal_annotations"
+      relative: true
+    source: path
     version: "2.2.0"
   zikzak_inappwebview_ios:
     dependency: "direct overridden"

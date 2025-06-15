@@ -1,3 +1,18 @@
+## 2.3.0 - 2025-06-15
+
+* Updated to Android SDK 36 support
+* Updated dependencies to use hosted references
+
+## 2.3.0 - 2025-06-15
+
+* Updated to Android SDK 36 support
+* Updated Android Gradle Plugin to 8.5.2
+* Updated AndroidX dependencies:
+  - androidx.webkit:webkit to 1.12.1
+  - androidx.browser:browser to 1.8.0
+  - androidx.appcompat:appcompat to 1.7.0
+* Improved Gradle performance settings
+
 ## 2.2.0 - 2025-06-01
 
 * fix  missing dynamic library error for libswiftWebKit.dylib

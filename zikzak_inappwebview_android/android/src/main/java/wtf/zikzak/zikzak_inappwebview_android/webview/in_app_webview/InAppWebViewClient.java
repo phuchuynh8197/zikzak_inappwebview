@@ -403,12 +403,9 @@ public class InAppWebViewClient extends WebViewClient {
     ) {
         final InAppWebView webView = (InAppWebView) view;
 
-        if (
-            !WebViewFeature.isFeatureSupported(
-                WebViewFeature.SUPPRESS_ERROR_PAGE
-            ) &&
-            webView.customSettings.disableDefaultErrorPage
-        ) {
+        // SUPPRESS_ERROR_PAGE feature is not supported in current androidx.webkit version
+        // Commenting out to prevent crash - handle error page suppression manually
+        if (webView.customSettings.disableDefaultErrorPage) {
             webView.stopLoading();
             webView.loadUrl("about:blank");
         }
@@ -823,8 +820,8 @@ public class InAppWebViewClient extends WebViewClient {
     public void onScaleChanged(WebView view, float oldScale, float newScale) {
         super.onScaleChanged(view, oldScale, newScale);
         final InAppWebView webView = (InAppWebView) view;
-        webView.zoomScale = newScale /
-        Util.getPixelDensity(webView.getContext());
+        webView.zoomScale =
+            newScale / Util.getPixelDensity(webView.getContext());
 
         if (webView.channelDelegate != null) {
             webView.channelDelegate.onZoomScaleChanged(oldScale, newScale);

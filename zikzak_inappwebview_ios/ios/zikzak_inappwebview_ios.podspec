@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'zikzak_inappwebview_ios'
-  s.version          = '2.2.0'
+  s.version          = '2.3.0'
   s.summary          = 'IOS implementation of the inappwebview plugin for Flutter.'
   s.description      = <<-DESC
 A new Flutter plugin.

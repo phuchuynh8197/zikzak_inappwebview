@@ -76,6 +76,30 @@ for pkg in "${PACKAGES[@]}"; do
     else
         echo -e "${RED}Warning: pubspec.yaml not found in $pkg. Skipping.${NC}"
     fi
+
+    # Update version in iOS podspec if it exists
+    if [ "$pkg" == "zikzak_inappwebview_ios" ] && [ -f "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" ]; then
+        echo -e "${BLUE}Updating iOS podspec version in $pkg to $VERSION${NC}"
+        # Use awk to update the version line in podspec
+        awk -v version="$VERSION" '{
+            if ($0 ~ /s\.version.*=.*/) {
+                gsub(/s\.version.*=.*'\''[^'\'']*'\''/, "s.version          = '\''" version "'\''");
+                print $0;
+            } else {
+                print $0;
+            }
+        }' "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" > "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec.new"
+
+        mv "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec.new" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec"
+
+        # Verify the podspec update
+        podspec_version=$(grep "s.version" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" | sed "s/.*= *'//" | sed "s/'.*//")
+        if [ "$podspec_version" != "$VERSION" ]; then
+            echo -e "${RED}Failed to update podspec version for $pkg to $VERSION. Current version: $podspec_version${NC}"
+        else
+            echo -e "${GREEN}Successfully updated iOS podspec in $pkg to version $VERSION${NC}"
+        fi
+    fi
 done
 
 # Update dependencies in each package to use versioned dependencies instead of path
