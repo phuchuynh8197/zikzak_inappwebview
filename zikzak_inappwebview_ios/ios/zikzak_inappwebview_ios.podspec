@@ -4,7 +4,7 @@
 #
 Pod::Spec.new do |s|
   s.name             = 'zikzak_inappwebview_ios'
-  s.version          = '2.4.0'
+  s.version          = '2.4.1'
   s.summary          = 'IOS implementation of the inappwebview plugin for Flutter.'
   s.description      = <<-DESC
 A new Flutter plugin.
@@ -12,7 +12,7 @@ A new Flutter plugin.
   s.homepage         = 'http://zikzak.wtf'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'ARRRRNY' => 'arrrrny@zikzak.wtf' }
-  s.source           = { :path => '.' }
+  s.source           = { :git => 'https://github.com/arrrrny/zikzak_inappwebview.git', :tag => s.version.to_s }
   s.source_files = 'Classes/**/*'
   s.resources = 'Storyboards/**/*.storyboard'
   s.public_header_files = 'Classes/**/*.h'
@@ -23,7 +23,7 @@ A new Flutter plugin.
     'DEFINES_MODULE' => 'YES',
   }
 
-  s.libraries = 'swiftCoreGraphics'
+  # Removed obsolete Swift overlay libraries
 
   # Removed obsolete LIBRARY_SEARCH_PATHS for Swift overlays
 
