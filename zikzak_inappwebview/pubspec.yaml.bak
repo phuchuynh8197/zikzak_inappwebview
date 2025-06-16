@@ -18,16 +18,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  zikzak_inappwebview_platform_interface:
-    path: ../zikzak_inappwebview_platform_interface
-  zikzak_inappwebview_android:
-    path: ../zikzak_inappwebview_android
-  zikzak_inappwebview_ios:
-    path: ../zikzak_inappwebview_ios
-  zikzak_inappwebview_macos:
-    path: ../zikzak_inappwebview_macos
-  zikzak_inappwebview_web:
-    path: ../zikzak_inappwebview_web
+  zikzak_inappwebview_platform_interface: ^2.4.5
+  zikzak_inappwebview_android: ^2.4.5
+  zikzak_inappwebview_ios: ^2.4.5
+  zikzak_inappwebview_macos: ^2.4.5
+  zikzak_inappwebview_web: ^2.4.5
 
 dev_dependencies:
   flutter_test:

@@ -75,6 +75,14 @@ for pkg in "${PACKAGES[@]}"; do
         # Use sed to update the version line in podspec
         sed -i '' "s/s\.version.*=.*/s.version          = '$VERSION'/" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec"
 
+        # Update podspec source to use Git for publishing
+        echo -e "${BLUE}Updating iOS podspec source to use Git for publishing${NC}"
+        sed -i '' "s|s\.source.*=.*{ :path => \"\\.\" }|s.source           = { :git => 'https://github.com/arrrrny/zikzak_inappwebview.git', :tag => s.version.to_s }|" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec"
+
+        # Update LICENSE path for Git publishing
+        echo -e "${BLUE}Updating iOS podspec LICENSE path for Git publishing${NC}"
+        sed -i '' "s|s\.license.*=.*{ :type => 'Apache-2.0', :file => '\.\./LICENSE' }|s.license          = { :type => 'Apache-2.0', :file => 'zikzak_inappwebview_ios/LICENSE' }|" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec"
+
         # Verify the podspec update
         podspec_version=$(grep "s.version" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" | sed "s/.*= *'//" | sed "s/'.*//")
         if [ "$podspec_version" != "$VERSION" ]; then

@@ -27,8 +27,7 @@ update_for_dev_mode() {
 
   echo "Processing $pubspec_file"
 
-  # Backup pubspec file
-  cp "$pubspec_file" "${pubspec_file}.bak"
+
 
   # Uncomment any commented path dependencies for dev_dependencies
   sed -i.tmp -E 's|^    #([ ]+path: ../zikzak_inappwebview.*)[ ]#[ ]Commented for publishing|\1|g' "$pubspec_file"
@@ -121,6 +120,24 @@ for package in zikzak_inappwebview zikzak_inappwebview_android zikzak_inappwebvi
     echo "⚠️ Directory not found: $ROOT_DIR/$package"
   fi
 done
+
+# Update iOS podspec for local development
+echo "Updating iOS podspec for local development..."
+ios_podspec="$ROOT_DIR/zikzak_inappwebview_ios/ios/zikzak_inappwebview_ios.podspec"
+if [ -f "$ios_podspec" ]; then
+  # Replace Git source with local path for development
+  sed -i.tmp -E 's|s\.source[[:space:]]*=[[:space:]]*\{[[:space:]]*:git[[:space:]]*=>[[:space:]]*.*:tag[[:space:]]*=>[[:space:]]*.*\}|s.source           = { :path => \".\" }|g' "$ios_podspec"
+
+  # Update LICENSE path for local development
+  sed -i.tmp -E "s|s\.license.*=.*{ :type => 'Apache-2.0', :file => 'zikzak_inappwebview_ios/LICENSE' }|s.license          = { :type => 'Apache-2.0', :file => '../LICENSE' }|" "$ios_podspec"
+
+  # Clean up temp file
+  rm -f "${ios_podspec}.tmp"
+
+  echo "✅ Updated iOS podspec to use local path for development"
+else
+  echo "⚠️ iOS podspec not found at $ios_podspec"
+fi
 
 # Run flutter pub get on all packages
 echo "Running 'flutter pub get' on all packages..."
