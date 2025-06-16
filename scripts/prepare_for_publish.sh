@@ -93,7 +93,6 @@ for pkg in "${PACKAGES[@]}"; do
     fi
 done
 
-# Function to convert path dependencies to versioned dependencies
 # Function to convert path dependencies to versioned dependencies AND update existing versions
 convert_path_to_versioned() {
     local file="$1"
@@ -114,56 +113,47 @@ convert_path_to_versioned() {
 
     # Create a temporary file
     local temp_file="${file}.tmp"
+    cp "$file" "$temp_file"
 
-    # Use awk to process the file and handle all dependency formats
-    awk -v version="$version" '
-    BEGIN {
-        # Build array of packages to update
-        packages_count = split("zikzak_inappwebview_internal_annotations zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows", packages, " ")
-        for (i = 1; i <= packages_count; i++) {
-            target_packages[packages[i]] = 1
-        }
-        in_dependency = ""
-    }
+    # Process each zikzak package
+    for pkg in "${packages[@]}"; do
+        # Method 1: Replace single-line versioned dependencies (package: ^1.2.3)
+        sed -i '' "s/^[[:space:]]*${pkg}:[[:space:]]*\^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*[[:space:]]*$/  ${pkg}: ^${version}/" "$temp_file"
 
-    {
-        # Check if this line defines a zikzak dependency (single line format)
-        matched = 0
-        for (pkg in target_packages) {
-            # Match: "  package_name: ^2.4.0" or "  package_name:" or "  package_name: any_version"
-            if ($0 ~ "^[[:space:]]*" pkg ":[[:space:]]*") {
-                print "  " pkg ": ^" version
-                matched = 1
-                break
+        # Method 2: Replace single-line versioned dependencies (package: 1.2.3)
+        sed -i '' "s/^[[:space:]]*${pkg}:[[:space:]]*[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*[[:space:]]*$/  ${pkg}: ^${version}/" "$temp_file"
+
+        # Method 3: Handle multi-line path dependencies
+        # This uses a more complex sed command to find the package line and replace the entire dependency block
+        sed -i '' "/^[[:space:]]*${pkg}:[[:space:]]*$/,/^[[:space:]]*[^[:space:]]/ {
+            /^[[:space:]]*${pkg}:[[:space:]]*$/ {
+                c\\
+  ${pkg}: ^${version}
+                d
             }
-        }
-        if (matched) next
+            /^[[:space:]]*path:[[:space:]]*/ d
+            /^[[:space:]]*version:[[:space:]]*/ d
+        }" "$temp_file"
 
-        # Check if this line starts a multi-line zikzak dependency
-        for (pkg in target_packages) {
-            if ($0 ~ "^[[:space:]]*" pkg ":[[:space:]]*$") {
+        # Method 4: Handle malformed dependencies where version and path are on separate lines
+        # First, find lines with "package: ^version" and mark them for replacement
+        awk -v pkg="$pkg" -v version="$version" '
+        BEGIN { in_malformed = 0 }
+        {
+            if ($0 ~ "^[[:space:]]*" pkg ":[[:space:]]*\\^[0-9]+\\.[0-9]+\\.[0-9]+[[:space:]]*$") {
                 print "  " pkg ": ^" version
-                in_dependency = pkg
-                matched = 1
-                break
-            }
-        }
-        if (matched) next
-
-        # If we are in a zikzak dependency block, skip path/version lines
-        if (in_dependency != "") {
-            if ($0 ~ /^[[:space:]]*path:/ || $0 ~ /^[[:space:]]*version:/) {
+                in_malformed = 1
                 next
             }
-            # Reset if we encounter a non-indented line or another dependency
-            if ($0 ~ /^[^[:space:]]/ || $0 ~ /^[[:space:]]*[^[:space:]]+:[[:space:]]*/) {
-                in_dependency = ""
+            if (in_malformed && $0 ~ /^[[:space:]]*path:/) {
+                in_malformed = 0
+                next
             }
-        }
-
-        # Print all other lines as-is
-        print $0
-    }' "$file" > "$temp_file"
+            in_malformed = 0
+            print $0
+        }' "$temp_file" > "${temp_file}.fixed"
+        mv "${temp_file}.fixed" "$temp_file"
+    done
 
     mv "$temp_file" "$file"
 
