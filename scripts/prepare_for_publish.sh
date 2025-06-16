@@ -281,20 +281,20 @@ fi
 
 echo -e "${GREEN}All packages updated to version $VERSION with versioned dependencies${NC}"
 
-# Ask user if they want to review changes first
-echo -e "${YELLOW}Would you like to review the changes before committing? (y/n)${NC}"
-read -r review_choice
-if [[ "$review_choice" == "y" || "$review_choice" == "Y" ]]; then
-    git diff
-fi
+# # Ask user if they want to review changes first
+# echo -e "${YELLOW}Would you like to review the changes before committing? (y/n)${NC}"
+# read -r review_choice
+# if [[ "$review_choice" == "y" || "$review_choice" == "Y" ]]; then
+#     git diff
+# fi
 
-# Ask if user wants to modify CHANGELOG files
-echo -e "${YELLOW}Would you like to modify CHANGELOG.md files to add more detailed release notes? (y/n)${NC}"
-read -r changelog_choice
-if [[ "$changelog_choice" == "y" || "$changelog_choice" == "Y" ]]; then
-    echo -e "${BLUE}Please edit the CHANGELOG.md files now. Press Enter when done.${NC}"
-    read -r
-fi
+# # Ask if user wants to modify CHANGELOG files
+# echo -e "${YELLOW}Would you like to modify CHANGELOG.md files to add more detailed release notes? (y/n)${NC}"
+# read -r changelog_choice
+# if [[ "$changelog_choice" == "y" || "$changelog_choice" == "Y" ]]; then
+#     echo -e "${BLUE}Please edit the CHANGELOG.md files now. Press Enter when done.${NC}"
+#     read -r
+# fi
 
 # Automatically commit changes
 echo -e "${BLUE}Committing changes...${NC}"
