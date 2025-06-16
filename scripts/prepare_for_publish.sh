@@ -232,27 +232,16 @@ check_package_on_pubdev() {
 
 # Check all packages on pub.dev and display a summary
 echo -e "${BLUE}\n=== Checking packages on pub.dev ===${NC}"
-declare -A package_status
+echo -e "${BLUE}\n=== Publication Status Summary ===${NC}"
 
 for pkg in "${PACKAGES[@]}"; do
     # Extract package name from directory
     pkg_name=$(basename "$pkg")
 
     if check_package_on_pubdev "$pkg_name" "$VERSION"; then
-        package_status["$pkg_name"]="Already published"
+        echo -e "${pkg_name}: ${RED}Already published${NC}"
     else
-        package_status["$pkg_name"]="Not published (ready to publish)"
-    fi
-done
-
-# Display publication status summary
-echo -e "${BLUE}\n=== Publication Status Summary ===${NC}"
-for pkg_name in "${!package_status[@]}"; do
-    status="${package_status[$pkg_name]}"
-    if [[ "$status" == "Already published" ]]; then
-        echo -e "${pkg_name}: ${RED}$status${NC}"
-    else
-        echo -e "${pkg_name}: ${GREEN}$status${NC}"
+        echo -e "${pkg_name}: ${GREEN}Not published (ready to publish)${NC}"
     fi
 done
 
@@ -280,21 +269,6 @@ else
 fi
 
 echo -e "${GREEN}All packages updated to version $VERSION with versioned dependencies${NC}"
-
-# # Ask user if they want to review changes first
-# echo -e "${YELLOW}Would you like to review the changes before committing? (y/n)${NC}"
-# read -r review_choice
-# if [[ "$review_choice" == "y" || "$review_choice" == "Y" ]]; then
-#     git diff
-# fi
-
-# # Ask if user wants to modify CHANGELOG files
-# echo -e "${YELLOW}Would you like to modify CHANGELOG.md files to add more detailed release notes? (y/n)${NC}"
-# read -r changelog_choice
-# if [[ "$changelog_choice" == "y" || "$changelog_choice" == "Y" ]]; then
-#     echo -e "${BLUE}Please edit the CHANGELOG.md files now. Press Enter when done.${NC}"
-#     read -r
-# fi
 
 # Automatically commit changes
 echo -e "${BLUE}Committing changes...${NC}"
