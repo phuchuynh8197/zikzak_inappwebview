@@ -5,13 +5,13 @@
 Pod::Spec.new do |s|
   s.name             = 'zikzak_inappwebview_ios'
   s.module_name      = 'zikzak_inappwebview_ios'
-  s.version          = '2.4.6'
+  s.version          = '2.4.5'
   s.summary          = 'IOS implementation of the inappwebview plugin for Flutter.'
   s.description      = <<-DESC
 iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView plugin for Flutter applications with support for iOS 13.0+. This plugin provides a powerful WebView widget with extensive customization options and JavaScript communication capabilities.
                        DESC
   s.homepage         = 'http://zikzak.wtf'
-  s.license          = { :type => 'Apache-2.0', :file => 'zikzak_inappwebview_ios/LICENSE' }
+  s.license          = { :type => 'Apache-2.0', :file => '../LICENSE' }
   s.author           = { 'ARRRRNY' => 'arrrrny@zikzak.wtf' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
