@@ -1,3 +1,8 @@
+## 2.4.6 - 2025-06-16
+
+* ios tested on example Xcode 16
+* Updated dependencies to use hosted references
+
 ## 2.4.5 - 2025-06-16
 
 * cocoapods path issuu fixed
