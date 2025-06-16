@@ -294,9 +294,11 @@ git add .
 git commit -m "Prepare for publishing version $VERSION"
 echo -e "${GREEN}Changes committed successfully!${NC}"
 
+
+
 echo -e "${YELLOW}Next steps:${NC}"
-echo -e "1. Publish packages in order using the publish.sh script"
-echo -e "2. After publishing, switch back to main branch: git checkout main"
+echo -e "1. Merge to master using: ./scripts/push_to_master.sh (this will create and push the git tag automatically)"
+echo -e "2. Publish packages in order using the publish.sh script"
 echo -e ""
 echo -e "${BLUE}To revert to development setup (path dependencies), use:${NC}"
 echo -e "./scripts/restore_dev_setup.sh"

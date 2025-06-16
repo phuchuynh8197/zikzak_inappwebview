@@ -14,6 +14,13 @@ echo -e "${BLUE}=== ZIKZAK PUSH TO master TOOL ===${NC}"
 CURRENT_BRANCH=$(git branch --show-current)
 echo -e "${YELLOW}Current branch: $CURRENT_BRANCH${NC}"
 
+# Extract version from branch name if it follows the pattern publish-X.Y.Z
+VERSION=""
+if [[ "$CURRENT_BRANCH" =~ ^publish-([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+    VERSION="${BASH_REMATCH[1]}"
+    echo -e "${GREEN}Detected version: $VERSION${NC}"
+fi
+
 # Check for uncommitted changes
 if ! git diff-index --quiet HEAD --; then
     echo -e "${RED}You have uncommitted changes. Please commit them before proceeding.${NC}"
@@ -73,6 +80,14 @@ git merge "$CURRENT_BRANCH" || {
     exit 1
 }
 
+# Create and push git tag if version was detected
+if [ -n "$VERSION" ]; then
+    echo -e "${BLUE}Creating git tag $VERSION on master...${NC}"
+    git tag "$VERSION" || {
+        echo -e "${YELLOW}Tag $VERSION already exists. Skipping tag creation.${NC}"
+    }
+fi
+
 # Push to remote
 echo -e "${BLUE}Pushing changes to remote master...${NC}"
 if git remote | grep -q "origin"; then
@@ -82,9 +97,22 @@ if git remote | grep -q "origin"; then
         exit 1
     }
     echo -e "${GREEN}Changes successfully pushed to remote master!${NC}"
+
+    # Push tag if it was created
+    if [ -n "$VERSION" ]; then
+        echo -e "${BLUE}Pushing tag $VERSION to remote...${NC}"
+        git push origin "$VERSION" || {
+            echo -e "${RED}Failed to push tag. Please push manually:${NC}"
+            echo -e "  git push origin $VERSION"
+        }
+        echo -e "${GREEN}Tag $VERSION pushed to remote successfully!${NC}"
+    fi
 else
     echo -e "${YELLOW}No remote named 'origin' found. Skipping push operation.${NC}"
     echo -e "${YELLOW}Please push manually when remote is configured.${NC}"
+    if [ -n "$VERSION" ]; then
+        echo -e "${YELLOW}Don't forget to push the tag: git push origin $VERSION${NC}"
+    fi
 fi
 
 # Ask if user wants to delete the branch

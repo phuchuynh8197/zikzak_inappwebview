@@ -100,6 +100,45 @@ check_dependencies() {
     return 0
 }
 
+# Function to publish a package to CocoaPods
+publish_to_cocoapods() {
+    local package_dir="$1"
+    local version="$2"
+
+    # Only publish iOS package to CocoaPods
+    if [ "$package_dir" != "zikzak_inappwebview_ios" ]; then
+        return 0
+    fi
+
+    echo -e "${BLUE}Publishing $package_dir to CocoaPods...${NC}"
+
+    # Navigate to the package directory
+    cd "$PROJECT_DIR/$package_dir"
+
+    # Check if podspec exists
+    if [ ! -f "ios/zikzak_inappwebview_ios.podspec" ]; then
+        echo -e "${RED}Podspec file not found at ios/zikzak_inappwebview_ios.podspec${NC}"
+        return 1
+    fi
+
+    # Validate podspec first
+    echo -e "${BLUE}Validating podspec...${NC}"
+    pod spec lint ios/zikzak_inappwebview_ios.podspec --allow-warnings || {
+        echo -e "${RED}Podspec validation failed.${NC}"
+        return 1
+    }
+
+    # Publish to CocoaPods trunk
+    echo -e "${BLUE}Publishing to CocoaPods trunk...${NC}"
+    pod trunk push ios/zikzak_inappwebview_ios.podspec --allow-warnings || {
+        echo -e "${RED}CocoaPods trunk push failed.${NC}"
+        return 1
+    }
+    echo -e "${GREEN}Package $package_dir published to CocoaPods successfully!${NC}"
+
+    return 0
+}
+
 # Function to publish a package
 publish_package() {
     local package_dir="$1"
@@ -114,6 +153,8 @@ publish_package() {
     # Check if package is already published
     if check_package_on_pubdev "$package_dir" "$version"; then
         echo -e "${GREEN}Skipping $package_dir version $version (already published)${NC}"
+        # Still try to publish to CocoaPods if it's the iOS package
+        publish_to_cocoapods "$package_dir" "$version"
         return 0
     fi
 
@@ -140,9 +181,12 @@ publish_package() {
     echo -e "${BLUE}Running dry-run...${NC}"
     flutter pub publish --dry-run
 
-    echo -e "${BLUE}Publishing...${NC}"
+    echo -e "${BLUE}Publishing to pub.dev...${NC}"
     flutter pub publish -f
-    echo -e "${GREEN}Package $package_dir published successfully!${NC}"
+    echo -e "${GREEN}Package $package_dir published to pub.dev successfully!${NC}"
+
+    # Also publish to CocoaPods if it's the iOS package
+    publish_to_cocoapods "$package_dir" "$version"
 
     return 0
 }
