@@ -53,7 +53,7 @@ check_package_on_pubdev() {
 # Function to check if all dependencies of a package are available on pub.dev
 check_dependencies() {
     local package_dir="$1"
-    local max_retries=20
+    local max_retries=60
     local retry_interval=60
 
     # Extract package version from pubspec.yaml

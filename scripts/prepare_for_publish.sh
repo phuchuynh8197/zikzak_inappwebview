@@ -55,16 +55,8 @@ for pkg in "${PACKAGES[@]}"; do
 
     # Update version in pubspec.yaml
     if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
-        # Use awk for reliable version replacement
-        awk -v version="$VERSION" '{
-            if ($0 ~ /^version:/) {
-                print "version: " version;
-            } else {
-                print $0;
-            }
-        }' "$ROOT_DIR/$pkg/pubspec.yaml" > "$ROOT_DIR/$pkg/pubspec.yaml.new"
-
-        mv "$ROOT_DIR/$pkg/pubspec.yaml.new" "$ROOT_DIR/$pkg/pubspec.yaml"
+        # Use sed for reliable version replacement
+        sed -i '' "s/^version:.*/version: $VERSION/" "$ROOT_DIR/$pkg/pubspec.yaml"
 
         # Verify the update
         new_version=$(grep "^version:" "$ROOT_DIR/$pkg/pubspec.yaml" | sed 's/version: //' | tr -d '[:space:]')
@@ -80,17 +72,8 @@ for pkg in "${PACKAGES[@]}"; do
     # Update version in iOS podspec if it exists
     if [ "$pkg" == "zikzak_inappwebview_ios" ] && [ -f "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" ]; then
         echo -e "${BLUE}Updating iOS podspec version in $pkg to $VERSION${NC}"
-        # Use awk to update the version line in podspec
-        awk -v version="$VERSION" '{
-            if ($0 ~ /s\.version.*=.*/) {
-                gsub(/s\.version.*=.*'\''[^'\'']*'\''/, "s.version          = '\''" version "'\''");
-                print $0;
-            } else {
-                print $0;
-            }
-        }' "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" > "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec.new"
-
-        mv "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec.new" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec"
+        # Use sed to update the version line in podspec
+        sed -i '' "s/s\.version.*=.*/s.version          = '$VERSION'/" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec"
 
         # Verify the podspec update
         podspec_version=$(grep "s.version" "$ROOT_DIR/$pkg/ios/zikzak_inappwebview_ios.podspec" | sed "s/.*= *'//" | sed "s/'.*//")
@@ -102,91 +85,95 @@ for pkg in "${PACKAGES[@]}"; do
     fi
 done
 
-# Function to update dependencies from path to versioned
-update_dependencies() {
+# Function to convert path dependencies to versioned dependencies
+# Function to convert path dependencies to versioned dependencies AND update existing versions
+convert_path_to_versioned() {
     local file="$1"
     local version="$2"
 
-    echo -e "${YELLOW}Updating dependencies in $file${NC}"
+    echo -e "${YELLOW}Converting path dependencies and updating versioned dependencies to $version in $file${NC}"
 
-    # Create a Python script to properly handle YAML dependency conversion
-    python3 - <<EOF
-import re
-import sys
+    # List of zikzak packages to convert/update
+    local packages=(
+        "zikzak_inappwebview_internal_annotations"
+        "zikzak_inappwebview_platform_interface"
+        "zikzak_inappwebview_android"
+        "zikzak_inappwebview_ios"
+        "zikzak_inappwebview_macos"
+        "zikzak_inappwebview_web"
+        "zikzak_inappwebview_windows"
+    )
 
-def convert_dependencies(content, version):
-    lines = content.split('\n')
-    result = []
-    i = 0
+    # Create a temporary file
+    local temp_file="${file}.tmp"
 
-    # List of packages to convert
-    packages = [
-        'zikzak_inappwebview_internal_annotations',
-        'zikzak_inappwebview_platform_interface',
-        'zikzak_inappwebview_android',
-        'zikzak_inappwebview_ios',
-        'zikzak_inappwebview_macos',
-        'zikzak_inappwebview_web',
-        'zikzak_inappwebview_windows'
-    ]
+    # Use awk to process the file and handle all dependency formats
+    awk -v version="$version" '
+    BEGIN {
+        # Build array of packages to update
+        packages_count = split("zikzak_inappwebview_internal_annotations zikzak_inappwebview_platform_interface zikzak_inappwebview_android zikzak_inappwebview_ios zikzak_inappwebview_macos zikzak_inappwebview_web zikzak_inappwebview_windows", packages, " ")
+        for (i = 1; i <= packages_count; i++) {
+            target_packages[packages[i]] = 1
+        }
+        in_dependency = ""
+    }
 
-    while i < len(lines):
-        line = lines[i]
-
-        # Check if this line is a dependency we want to convert
-        dependency_found = False
-        for pkg in packages:
-            # Match dependency line with or without version
-            if re.match(f'^  {re.escape(pkg)}:', line):
-                dependency_found = True
-                # Replace with versioned dependency
-                result.append(f'  {pkg}: ^{version}')
-
-                # Skip the next line if it's a path specification
-                if i + 1 < len(lines) and 'path:' in lines[i + 1]:
-                    i += 1  # Skip the path line
+    {
+        # Check if this line defines a zikzak dependency (single line format)
+        matched = 0
+        for (pkg in target_packages) {
+            # Match: "  package_name: ^2.4.0" or "  package_name:" or "  package_name: any_version"
+            if ($0 ~ "^[[:space:]]*" pkg ":[[:space:]]*") {
+                print "  " pkg ": ^" version
+                matched = 1
                 break
+            }
+        }
+        if (matched) next
 
-        if not dependency_found:
-            result.append(line)
+        # Check if this line starts a multi-line zikzak dependency
+        for (pkg in target_packages) {
+            if ($0 ~ "^[[:space:]]*" pkg ":[[:space:]]*$") {
+                print "  " pkg ": ^" version
+                in_dependency = pkg
+                matched = 1
+                break
+            }
+        }
+        if (matched) next
 
-        i += 1
+        # If we are in a zikzak dependency block, skip path/version lines
+        if (in_dependency != "") {
+            if ($0 ~ /^[[:space:]]*path:/ || $0 ~ /^[[:space:]]*version:/) {
+                next
+            }
+            # Reset if we encounter a non-indented line or another dependency
+            if ($0 ~ /^[^[:space:]]/ || $0 ~ /^[[:space:]]*[^[:space:]]+:[[:space:]]*/) {
+                in_dependency = ""
+            }
+        }
 
-    return '\n'.join(result)
+        # Print all other lines as-is
+        print $0
+    }' "$file" > "$temp_file"
 
-# Read the file
-with open('$file', 'r') as f:
-    content = f.read()
+    mv "$temp_file" "$file"
 
-# Convert dependencies
-updated_content = convert_dependencies(content, '$version')
-
-# Write back to file
-with open('$file', 'w') as f:
-    f.write(updated_content)
-
-print(f"Updated dependencies in $file")
-EOF
+    echo -e "${GREEN}Updated zikzak dependencies to version ^$version in $file${NC}"
 }
+
 
 # Update dependencies in each package to use versioned dependencies instead of path
 echo -e "${BLUE}Updating dependencies to use versioned references${NC}"
 
-# Update platform_interface dependency in all platform packages
-for pkg in "zikzak_inappwebview_android" "zikzak_inappwebview_ios" "zikzak_inappwebview_macos" "zikzak_inappwebview_web" "zikzak_inappwebview_windows"; do
+# Update dependencies in ALL packages
+for pkg in "${PACKAGES[@]}"; do
     if [ -f "$ROOT_DIR/$pkg/pubspec.yaml" ]; then
-        update_dependencies "$ROOT_DIR/$pkg/pubspec.yaml" "$VERSION"
+        convert_path_to_versioned "$ROOT_DIR/$pkg/pubspec.yaml" "$VERSION"
     else
         echo -e "${RED}Warning: pubspec.yaml not found in $pkg. Skipping.${NC}"
     fi
 done
-
-# Update all dependencies in the main package
-if [ -f "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" ]; then
-    update_dependencies "$ROOT_DIR/zikzak_inappwebview/pubspec.yaml" "$VERSION"
-else
-    echo -e "${RED}Warning: pubspec.yaml not found for main package. Skipping.${NC}"
-fi
 
 # Ask for the commit message that will be used for both Git commit and CHANGELOG files
 echo -e "${YELLOW}Enter a commit/changelog message for version $VERSION (default: 'Prepare for publishing version $VERSION'):${NC}"
