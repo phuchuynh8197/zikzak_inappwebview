@@ -1,5 +1,10 @@
 ## 2.4.6 - 2025-06-16
 
+* updated pod repo paths
+* Updated dependencies to use hosted references
+
+## 2.4.6 - 2025-06-16
+
 * fixed ios
 * Updated dependencies to use hosted references
 
