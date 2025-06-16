@@ -112,25 +112,26 @@ publish_to_cocoapods() {
 
     echo -e "${BLUE}Publishing $package_dir to CocoaPods...${NC}"
 
-    # Navigate to the package directory
-    cd "$PROJECT_DIR/$package_dir"
+    # Stay in the root directory for validation and publishing
+    cd "$PROJECT_DIR"
 
     # Check if podspec exists
-    if [ ! -f "ios/zikzak_inappwebview_ios.podspec" ]; then
-        echo -e "${RED}Podspec file not found at ios/zikzak_inappwebview_ios.podspec${NC}"
+    if [ ! -f "$package_dir/ios/zikzak_inappwebview_ios.podspec" ]; then
+        echo -e "${RED}Podspec file not found at $package_dir/ios/zikzak_inappwebview_ios.podspec${NC}"
         return 1
     fi
 
-    # Validate podspec first
+    # Validate podspec first (from root directory)
     echo -e "${BLUE}Validating podspec...${NC}"
-    pod spec lint ios/zikzak_inappwebview_ios.podspec --allow-warnings || {
+    pod spec lint "$package_dir/ios/zikzak_inappwebview_ios.podspec" --allow-warnings || {
         echo -e "${RED}Podspec validation failed.${NC}"
         return 1
     }
 
-    # Publish to CocoaPods trunk
+    # Change to iOS directory for publishing
     echo -e "${BLUE}Publishing to CocoaPods trunk...${NC}"
-    pod trunk push ios/zikzak_inappwebview_ios.podspec --allow-warnings || {
+    cd "$PROJECT_DIR/$package_dir/ios"
+    pod trunk push zikzak_inappwebview_ios.podspec --allow-warnings || {
         echo -e "${RED}CocoaPods trunk push failed.${NC}"
         return 1
     }
