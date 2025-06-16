@@ -1,17 +1,17 @@
 PODS:
   - Flutter (1.0.0)
-  - OrderedSet (5.0.0)
+  - OrderedSet (6.0.3)
   - pointer_interceptor_ios (0.0.1):
     - Flutter
   - url_launcher_ios (0.0.1):
     - Flutter
-  - zikzak_inappwebview_ios (2.3.0):
+  - zikzak_inappwebview_ios (2.4.5):
     - Flutter
-    - OrderedSet (~> 5.0)
-    - zikzak_inappwebview_ios/Core (= 2.3.0)
-  - zikzak_inappwebview_ios/Core (2.3.0):
+    - OrderedSet (>= 6.0.3)
+    - zikzak_inappwebview_ios/Core (= 2.4.5)
+  - zikzak_inappwebview_ios/Core (2.4.5):
     - Flutter
-    - OrderedSet (~> 5.0)
+    - OrderedSet (>= 6.0.3)
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
@@ -35,11 +35,11 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  OrderedSet: aaeb196f7fef5a9edf55d89760da9176ad40b93c
+  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
   pointer_interceptor_ios: ec847ef8b0915778bed2b2cef636f4d177fa8eed
   url_launcher_ios: 694010445543906933d732453a59da0a173ae33d
-  zikzak_inappwebview_ios: 9ee2832756b24cdf81042beee1fa60a13b45fc51
+  zikzak_inappwebview_ios: 07eba09433505340d7417248ce07233d103e0a89
 
-PODFILE CHECKSUM: 819463e6a0290f5a72f145ba7cde16e8b6ef0796
+PODFILE CHECKSUM: 83f6a08c58d4b249cda5d50acce1e33fac59623c
 
 COCOAPODS: 1.16.2
