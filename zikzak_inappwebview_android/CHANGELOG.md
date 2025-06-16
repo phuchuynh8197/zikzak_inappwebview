@@ -1,3 +1,8 @@
+## 2.4.4 - 2025-06-16
+
+* bump versions
+* Updated dependencies to use hosted references
+
 ## 2.4.3 - 2025-06-16
 
 * bump versions
