@@ -18,9 +18,9 @@ Pod::Spec.new do |s|
   s.source           = { :git => 'https://github.com/phuchuynh8197/zikzak_inappwebview.git', :tag => s.version.to_s }
 
   # 💥 Đường dẫn này cần KHỚP với nơi chứa file `.m`, `.h`
-  s.source_files     = 'ios/Classes/**/*.{h,m,swift}'
-  s.public_header_files = 'ios/Classes/**/*.h'
-  s.resources        = 'ios/Storyboards/**/*.storyboard'
+s.source_files = 'Classes/**/*.{h,m,swift}'
+s.public_header_files = 'Classes/**/*.h'
+s.resources = 'Storyboards/**/*.storyboard'
 
   s.dependency 'Flutter'
   s.dependency 'OrderedSet', '>= 6.0.3'
