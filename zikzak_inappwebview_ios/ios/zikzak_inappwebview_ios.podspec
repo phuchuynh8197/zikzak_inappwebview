@@ -11,9 +11,9 @@ Pod::Spec.new do |s|
 iOS implementation of the Flutter inappwebview plugin. A feature-rich WebView plugin for Flutter applications with support for iOS 13.0+. This plugin provides a powerful WebView widget with extensive customization options and JavaScript communication capabilities.
                        DESC
   s.homepage         = 'http://zikzak.wtf'
-  s.license          = { :type => 'Apache-2.0', :file => 'zikzak_inappwebview_ios/LICENSE' }
+  s.license = { :type => 'Apache-2.0', :file => '../LICENSE' }
   s.author           = { 'ARRRRNY' => 'arrrrny@zikzak.wtf' }
-  s.source           = { :git => 'https://github.com/arrrrny/zikzak_inappwebview.git', :tag => s.version.to_s }
+  s.source = { :git => 'https://github.com/phuchuynh8197/zikzak_inappwebview.git', :tag => s.version.to_s }
   s.source_files = 'ios/Classes/**/*'
   s.resources = 'ios/Storyboards/**/*.storyboard'
   s.public_header_files = 'zikzak_inappwebview_ios/ios/Classes/**/*.h'
